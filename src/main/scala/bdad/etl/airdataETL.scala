@@ -1,3 +1,5 @@
+package bdad.etl
+
 import java.io.File
 import java.nio.file.Paths
 
