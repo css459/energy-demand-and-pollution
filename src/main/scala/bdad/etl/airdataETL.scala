@@ -23,8 +23,8 @@ object RelevantCols {
 
 object AirDataETL {
 
-  //  val AIRDATA_HOME = "/scratch/css459/AIRDATA"
-  val AIRDATA_HOME = "/home/cole/Documents/DATA/AIRDATA"
+  val AIRDATA_HOME = "/scratch/css459/AIRDATA"
+  // val AIRDATA_HOME = "/home/cole/Documents/DATA/AIRDATA"
 
   val AIRDATA_OUTPUT = "/scratch/css459/AIRDATA_COMBINED"
 

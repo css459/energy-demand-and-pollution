@@ -2,5 +2,6 @@
 *.log
 
 .idea/
+target/
 
 scratch-cole/data
