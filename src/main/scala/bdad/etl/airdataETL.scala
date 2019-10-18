@@ -34,7 +34,7 @@ object AirDataETL {
     spark.read
       .format("csv")
       .option("header", "true")
-      .load(Paths.get(containingDir.toString, "*.csv").toString)
+      .load(Paths.get("file://", containingDir.toString, "*.csv").toString)
   }
 
   def getListOfSubDirectories(directory: String): Array[String] = {
@@ -50,14 +50,8 @@ object AirDataETL {
 
   def makeOutputPathFromDirectory(directory: String): String = {
     val fileName = directory.split('/').takeRight(2).mkString("_") + ".csv"
-    Paths.get(AIRDATA_OUTPUT, fileName).toString
+    Paths.get("file://", AIRDATA_OUTPUT, fileName).toString
   }
-
-  //  def etlSubdirectory(directory: String): Unit = {
-  //    val dfSubclass = loadCSVSet(directory)
-  //
-  //  }
-
 
   def main(args: Array[String]): Unit = {
     val spark = SparkSession
@@ -80,6 +74,7 @@ object AirDataETL {
 
     // FOR DEBUGGING PURPOSES
     val airdataClassesReduced = spark.sparkContext.parallelize(airdataClasses.take(2))
+    airdataClassesReduced.foreach(println)
 
     // Read a collection of CSVs in each Air Data class, and run
     // the ETL operations on those sets. Then, write each of them
@@ -94,8 +89,10 @@ object AirDataETL {
     //    5. Write back combined CSV files to disk
     //
     val allDataFrames = airdataClassesReduced
-      .map(groupPath => (popLastDirectory(groupPath), loadCSVSet(groupPath)))
-      .mapValues(RelevantCols.selectRelevantCols)
+      .map(groupPath => (popLastDirectory(groupPath), RelevantCols.selectRelevantCols(loadCSVSet(groupPath))))
+      //.mapValues(RelevantCols.selectRelevantCols)
+
+    allDataFrames.keys.foreach(println)
 
     val combinedDataFrames = allDataFrames.reduceByKey((a, b) => a.union(b))
 
