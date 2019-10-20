@@ -17,5 +17,8 @@ object AirDatasetTest extends App {
   //  df.columns.foreach(println)
   //  println(df.first)
 
-  airdata.pivotedDF(dropNull = true).count()
+  airdata.df.show(20, truncate = false)
+
+  // TODO: Why does this cause an exception?
+  // airdata.pivotedDF(dropNull = true).count()
 }

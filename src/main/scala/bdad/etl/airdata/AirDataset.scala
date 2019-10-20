@@ -116,17 +116,17 @@ object AirDataset {
         // The name of the thing being measured
         .withColumn("criteria", newDF("criteria").cast("string"))
 
-        // The place of measurement (Precision of 3 decimals or about 111 Meters)
-        .withColumn("lat", newDF("lat").cast("double"))
-        .withColumn("lon", newDF("lon").cast("double"))
+        // The place of measurement (Precision of 6 decimals to exclude tiny mantissa values)
+        .withColumn("lat", round(newDF("lat").cast("double"), 6))
+        .withColumn("lon", round(newDF("lon").cast("double"), 6))
 
         // Date: To form a Date Type column, concatenate the two Sting columns of Day and Hour
         .withColumn("dateGMT",
         to_date(concat(newDF("dateGMT"), lit(" "), newDF("timeGMT")), "yyyy-MM-dd H:mm"))
 
-        // The units and value of the measurement
+        // The units and value of the measurement (Round to 10 to exclude tiny mantissa values)
         .withColumn("unit", newDF("unit").cast("string"))
-        .withColumn("value", newDF("value").cast("double"))
+        .withColumn("value", round(newDF("value").cast("double"), 10))
         .drop("timeGMT")
     }
   }
@@ -162,6 +162,17 @@ class AirDataset(var years: Array[Int] = AirDataset.ALL_YEARS, var criteria: Arr
   val df: DataFrame = ETL.convertSchema(filterYearAndCols(formMajorDF(formFileList())))
 
   /**
+    * The set of criteria covered by this instance of the AIRDATA dataset.
+    */
+  val validCriteria: Array[String] = df
+    .select("criteria")
+    .distinct
+    .collect
+    .map(_.toString)
+    .map(_.stripPrefix("["))
+    .map(_.stripSuffix("]"))
+
+  /**
     * Returns the combined, cleaned Dataframe of this class, but pivoted on the Criteria column.
     * In this way, each row is a unique area (defined by the `latLonPrecision` at a given time,
     * `dateGMT`. Not all measurements are available in all areas, so the matrix may be sparse.
@@ -181,8 +192,12 @@ class AirDataset(var years: Array[Int] = AirDataset.ALL_YEARS, var criteria: Arr
     */
   def pivotedDF(dropNull: Boolean, latLonPrecision: Int = 3): DataFrame = {
     val pivoted = df
+
+      // Change Precision
       .withColumn("lat", round(df("lat"), latLonPrecision))
       .withColumn("lon", round(df("lon"), latLonPrecision))
+
+      // Group by place and time, pivot Criteria on Values
       .groupBy(
         "lat",
         "lon",
@@ -191,7 +206,7 @@ class AirDataset(var years: Array[Int] = AirDataset.ALL_YEARS, var criteria: Arr
       .agg(avg("value"), first("unit"))
 
     if (dropNull)
-      pivoted.na.drop
+      pivoted.na.drop("any")
     else
       pivoted
   }
