@@ -147,10 +147,20 @@ object AirDataset {
   *
   * The resulting Dataframe is stored in the `df` property.
   *
-  * @param years    The list of years to use (Use Dataset.makeYearList() to form)
-  * @param criteria The measurement parameters included in the Dataframe
+  * @param years    The list of years to use (Use Dataset.makeYearList() to form) (or singular Int year)
+  * @param criteria The measurement parameters included in the Dataframe (or singular String criteria)
   */
 class AirDataset(var years: Array[Int] = AirDataset.ALL_YEARS, var criteria: Array[String]) {
+
+  //
+  // Constructors
+  //
+
+  def this(years: Array[Int], criteria: String) = this(years, Array(criteria))
+
+  def this(year: Int, criteria: String) = this(AirDataset.makeYearList(year), Array(criteria))
+
+  def this(year: Int, criteria: Array[String]) = this(AirDataset.makeYearList(year), criteria)
 
   //
   // Public Fields

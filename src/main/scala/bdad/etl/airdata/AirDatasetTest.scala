@@ -10,14 +10,13 @@ object AirDatasetTest extends App {
     .config("spark.master", "local")
     .getOrCreate
 
-  val criteria = Array("2019_EXPANDED")
-  val airdata = new AirDataset(AirDataset.ALL_YEARS, criteria)
+  //  val criteria = Array("2019_EXPANDED")
+  //  val airdata = new AirDataset(AirDataset.ALL_YEARS, criteria)
 
-  //  val df = airdata.df.cache
-  //  df.columns.foreach(println)
-  //  println(df.first)
+  val airdata = new AirDataset(2019, "2019_EXPANDED/hourly_42101_2019.csv")
 
-  airdata.df.show(20, truncate = false)
+  // Show Test DF
+  airdata.df.cache.show(20, truncate = false)
 
   // TODO: Why does this cause an exception?
   // airdata.pivotedDF(dropNull = true).count()
