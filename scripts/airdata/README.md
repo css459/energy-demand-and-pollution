@@ -18,3 +18,7 @@ The time span can be changed using the `span` variable.
 The files come in as ZIP files. Afrer the downloader is finished, the `unzip_all.py` script will walk the `AIRDATA`
 directory and convert each ZIP to a CSV. (WARNING: THIS WILL EXPAND TO OVER 300GB)
 
+The files are now ready to be uploaded to HDFS by uploading the AIRDATA directory.
+
+`hadoop dfs -put AIRDATA AIRDATA`
+
