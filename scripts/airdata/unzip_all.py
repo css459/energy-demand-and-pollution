@@ -1,3 +1,8 @@
+#
+# Air Data Downloader (EPA)
+# Cole Smith
+#
+
 import os
 import zipfile
 from zipfile import BadZipFile
