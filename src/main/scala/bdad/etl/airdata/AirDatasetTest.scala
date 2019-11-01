@@ -10,8 +10,8 @@ object AirDatasetTest extends App {
     .config("spark.master", "local")
     .getOrCreate
 
-    val criteria = Array("2019_EXPANDED")
-    val airdata = new AirDataset(AirDataset.ALL_YEARS, criteria)
+    val criteria = Array("gasses/co")
+    val airdata = new AirDataset(2019, criteria)
 
   // val airdata = new AirDataset(2019, "2019_EXPANDED/hourly_42101_2019.csv")
 

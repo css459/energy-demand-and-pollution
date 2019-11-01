@@ -10,6 +10,7 @@ package bdad.etl.airdata
 import java.nio.file.Paths
 
 import bdad.etl.airdata.AirDataset.ETL
+import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -17,8 +18,8 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 object AirDataset {
 
   // Constants
-  val AIRDATA = "/home/cole/Documents/DATA/AIRDATA/"
-  // val AIRDATA = "hdfs:///user/css459/AIRDATA"
+  // val AIRDATA = "/home/cole/Documents/DATA/AIRDATA/"
+  val AIRDATA = "hdfs:///user/css459/AIRDATA"
 
   // Year Listing
   val ALL_YEARS: Array[Int] = makeYearList(1980, 2019)
@@ -170,7 +171,7 @@ class AirDataset(var years: Array[Int] = AirDataset.ALL_YEARS, var criteria: Arr
   /**
     * The converted, cleaned, and filtered DataFrame for the given class instance.
     */
-  val df: DataFrame = ETL.convertSchema(filterYearAndCols(formMajorDF(formFileList())))
+  val df: DataFrame = ETL.convertSchema(AirDataset.ETL.selectRelevantCols(formMajorDF(formFileList())))
 
   /**
     * The set of criteria covered by this instance of the AIRDATA dataset.
@@ -228,38 +229,50 @@ class AirDataset(var years: Array[Int] = AirDataset.ALL_YEARS, var criteria: Arr
 
   // Forms the distinct file paths in AIRDATA that we must read from
   private def formFileList(): Array[String] = {
-    criteria.map(Paths.get(AirDataset.AIRDATA, _).toString).distinct
+    // criteria.map(Paths.get(AirDataset.AIRDATA, _).toString).distinct
+
+    val sc = SparkSession.builder.getOrCreate.sparkContext
+
+    criteria
+
+      // Append the AIRDATA home path, and filter down to distinct
+      // paths
+      .map(Paths.get(AirDataset.AIRDATA, _).toString)
+      .distinct
+
+      // Map requested years to base paths
+      .flatMap(p => years.map(y => Paths.get(p, "*" + y.toString + "*.csv").toString))
+
+      // Expand the globs to fully-qualified paths
+      .flatMap(p => FileSystem
+        .get(sc.hadoopConfiguration)
+        .globStatus(new Path(p)))
+      .map(p => p.getPath.toString)
   }
 
   // Returns a major Dataframe of all information in the requested AIRDATA paths
   private def formMajorDF(dirList: Array[String]): DataFrame = {
     val spark = SparkSession.builder.getOrCreate
-    years
-      .map(y => y.toString)
-      .flatMap(y => dirList.map(p => Paths.get(p, "*" + y + ".zip").toString))
+    dirList
       .map(spark.read.option("header", "true").csv(_))
       .reduce(_ union _)
-
-    //    dirList
-    //      .map(spark.read.option("header", "true").csv(_))
-    //      .reduce(_ union _)
   }
 
-  // Returns a minor Dataframe by filtering the major Dataframe by the required Date range
-  private def filterYearAndCols(majorDF: DataFrame): DataFrame = {
-    AirDataset.ETL.selectRelevantCols(majorDF)
+  // // Returns a minor Dataframe by filtering the major Dataframe by the required Date range
+  // private def filterYearAndCols(majorDF: DataFrame): DataFrame = {
+  //   AirDataset.ETL.selectRelevantCols(majorDF)
 
-    //    if (!years.equals(AirDataset.ALL_YEARS)) {
-    //
-    //      val strYears = years.map(y => y.toString)
-    //      AirDataset.ETL.selectRelevantCols(majorDF
-    //        .filter(col("Date GMT")
-    //          .substr(0, 4)
-    //          .isin(strYears: _*))
-    //      )
-    //    } else {
-    //
-    //      AirDataset.ETL.selectRelevantCols(majorDF)
-    //    }
-  }
+  //   //    if (!years.equals(AirDataset.ALL_YEARS)) {
+  //   //
+  //   //      val strYears = years.map(y => y.toString)
+  //   //      AirDataset.ETL.selectRelevantCols(majorDF
+  //   //        .filter(col("Date GMT")
+  //   //          .substr(0, 4)
+  //   //          .isin(strYears: _*))
+  //   //      )
+  //   //    } else {
+  //   //
+  //   //      AirDataset.ETL.selectRelevantCols(majorDF)
+  //   //    }
+  // }
 }
