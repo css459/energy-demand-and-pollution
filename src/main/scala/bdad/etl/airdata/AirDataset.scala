@@ -124,7 +124,7 @@ object AirDataset {
 
         // Date: To form a Date Type column, concatenate the two Sting columns of Day and Hour
         .withColumn("dateGMT",
-        to_date(concat(newDF("dateGMT"), lit(" "), newDF("timeGMT")), "yyyy-MM-dd H:mm"))
+          to_date(concat(newDF("dateGMT"), lit(" "), newDF("timeGMT")), "yyyy-MM-dd H:mm"))
 
         // The units and value of the measurement (Round to 10 to exclude tiny mantissa values)
         .withColumn("unit", newDF("unit").cast("string"))
@@ -257,22 +257,4 @@ class AirDataset(var years: Array[Int] = AirDataset.ALL_YEARS, var criteria: Arr
       .map(spark.read.option("header", "true").csv(_))
       .reduce(_ union _)
   }
-
-  // // Returns a minor Dataframe by filtering the major Dataframe by the required Date range
-  // private def filterYearAndCols(majorDF: DataFrame): DataFrame = {
-  //   AirDataset.ETL.selectRelevantCols(majorDF)
-
-  //   //    if (!years.equals(AirDataset.ALL_YEARS)) {
-  //   //
-  //   //      val strYears = years.map(y => y.toString)
-  //   //      AirDataset.ETL.selectRelevantCols(majorDF
-  //   //        .filter(col("Date GMT")
-  //   //          .substr(0, 4)
-  //   //          .isin(strYears: _*))
-  //   //      )
-  //   //    } else {
-  //   //
-  //   //      AirDataset.ETL.selectRelevantCols(majorDF)
-  //   //    }
-  // }
 }

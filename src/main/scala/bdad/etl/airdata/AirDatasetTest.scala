@@ -31,6 +31,5 @@ object AirDatasetTest extends App {
   // println("UNITS")
   // df.select("unit").distinct.show(false)
 
-  // TODO: Why does this cause an exception?
-  // airdata.pivotedDF(dropNull = true).count()
+  airdata.pivotedDF(dropNull = true).count()
 }
