@@ -18,6 +18,7 @@ object AirDataset {
 
   // Constants
   val AIRDATA = "/home/cole/Documents/DATA/AIRDATA/"
+  // val AIRDATA = "hdfs:///user/css459/AIRDATA"
 
   // Year Listing
   val ALL_YEARS: Array[Int] = makeYearList(1980, 2019)
@@ -233,23 +234,32 @@ class AirDataset(var years: Array[Int] = AirDataset.ALL_YEARS, var criteria: Arr
   // Returns a major Dataframe of all information in the requested AIRDATA paths
   private def formMajorDF(dirList: Array[String]): DataFrame = {
     val spark = SparkSession.builder.getOrCreate
-    dirList.map(spark.read.option("header", "true").csv(_)).reduce(_ union _)
+    years
+      .map(y => y.toString)
+      .flatMap(y => dirList.map(p => Paths.get(p, "*" + y + ".zip").toString))
+      .map(spark.read.option("header", "true").csv(_))
+      .reduce(_ union _)
+
+    //    dirList
+    //      .map(spark.read.option("header", "true").csv(_))
+    //      .reduce(_ union _)
   }
 
   // Returns a minor Dataframe by filtering the major Dataframe by the required Date range
   private def filterYearAndCols(majorDF: DataFrame): DataFrame = {
+    AirDataset.ETL.selectRelevantCols(majorDF)
 
-    if (!years.equals(AirDataset.ALL_YEARS)) {
-
-      val strYears = years.map(y => y.toString)
-      AirDataset.ETL.selectRelevantCols(majorDF
-        .filter(col("Date GMT")
-          .substr(0, 4)
-          .isin(strYears: _*))
-      )
-    } else {
-
-      AirDataset.ETL.selectRelevantCols(majorDF)
-    }
+    //    if (!years.equals(AirDataset.ALL_YEARS)) {
+    //
+    //      val strYears = years.map(y => y.toString)
+    //      AirDataset.ETL.selectRelevantCols(majorDF
+    //        .filter(col("Date GMT")
+    //          .substr(0, 4)
+    //          .isin(strYears: _*))
+    //      )
+    //    } else {
+    //
+    //      AirDataset.ETL.selectRelevantCols(majorDF)
+    //    }
   }
 }
