@@ -77,6 +77,8 @@ object AirDataset {
   object ETL {
     val COLS = Array(
       "Parameter Name",
+      "State Name",
+      "County Name",
       "Latitude",
       "Longitude",
       "Date GMT",
@@ -86,6 +88,8 @@ object AirDataset {
 
     val NEW_COLS = Array(
       "criteria",
+      "state",
+      "county",
       "lat",
       "lon",
       "dateGMT",
@@ -117,6 +121,10 @@ object AirDataset {
       newDF
         // The name of the thing being measured
         .withColumn("criteria", newDF("criteria").cast("string"))
+
+        // State and County in normalized form
+        .withColumn("state", lower(newDF("state").cast("string")))
+        .withColumn("county", lower(newDF("county").cast("string")))
 
         // The place of measurement (Precision of 6 decimals to exclude tiny mantissa values)
         .withColumn("lat", round(newDF("lat").cast("double"), 6))
