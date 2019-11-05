@@ -1,5 +1,6 @@
 package bdad.etl.airdata
 
+import bdad.etl.util.{maxAbs, normalize}
 import org.apache.spark.sql.SparkSession
 
 object AirDatasetTest extends App {
@@ -10,15 +11,11 @@ object AirDatasetTest extends App {
     .config("spark.master", "local")
     .getOrCreate
 
-    val criteria = Array("gasses/co")
-    val airdata = new AirDataset(2019, criteria)
+  val criteria = Array("gasses/*")
+  val airdata = new AirDataset(2019, criteria)
 
-  // val airdata = new AirDataset(2019, "2019_EXPANDED/hourly_42101_2019.csv")
-
-  // Show Test DF
-  val df = airdata.df.cache
-  df.show(20, truncate = false)
-  df.printSchema()
+  // Show Schema
+  // df.printSchema()
 
   // Show Describe Table
   // df.describe().show(false)
@@ -31,5 +28,13 @@ object AirDatasetTest extends App {
   // println("UNITS")
   // df.select("unit").distinct.show(false)
 
-  airdata.pivotedDF(dropNull = true).count()
+  // Test of Utilities: Scaling Features of Pivoted DataFrame
+  val piv = airdata.pivotedDF(dropNull = true, dropUnit = true)
+  piv.show(false)
+
+  // Apply Normalization using Std and Mean
+  val normed = normalize(piv, airdata.validCriteria, useMean = true, useStd = true)
+
+  // Apply Max Absolute scaling to get values in range [-1,1]
+  maxAbs(normed, Array("scaled_features")).show(false)
 }

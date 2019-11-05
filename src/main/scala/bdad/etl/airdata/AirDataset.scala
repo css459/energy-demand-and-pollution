@@ -18,7 +18,6 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 object AirDataset {
 
   // Constants
-  // val AIRDATA = "/home/cole/Documents/DATA/AIRDATA/"
   val AIRDATA = "hdfs:///user/css459/AIRDATA"
 
   // Year Listing
@@ -120,7 +119,8 @@ object AirDataset {
       val newDF = df.toDF(NEW_COLS: _*)
       newDF
         // The name of the thing being measured
-        .withColumn("criteria", newDF("criteria").cast("string"))
+        .withColumn("criteria",
+          regexp_replace(newDF("criteria").cast("string"), "&", "and"))
 
         // State and County in normalized form
         .withColumn("state", lower(newDF("state").cast("string")))
@@ -208,10 +208,14 @@ class AirDataset(var years: Array[Int] = AirDataset.ALL_YEARS, var criteria: Arr
     *
     * @param dropNull        Whether or not to drop all rows with any null value
     * @param latLonPrecision The number of decimal places to use for Lat and Lon
+    * @param dropUnit        Whether or not to drop the unit column. This is required
+    *                        if using pivoted data for normalization.
     * @return Pivoted `Dataframe` object.
     */
-  def pivotedDF(dropNull: Boolean, latLonPrecision: Int = 3): DataFrame = {
-    val pivoted = df
+  def pivotedDF(dropNull: Boolean, latLonPrecision: Int = 3, dropUnit: Boolean = false): DataFrame = {
+
+    val initial = if (dropUnit) df.drop("unit") else df
+    val pivoted = initial
 
       // Change Precision
       .withColumn("lat", round(df("lat"), latLonPrecision))
@@ -223,12 +227,16 @@ class AirDataset(var years: Array[Int] = AirDataset.ALL_YEARS, var criteria: Arr
         "lon",
         "dateGMT")
       .pivot("criteria")
-      .agg(avg("value"), first("unit"))
+
+    val pivotAgg = if (dropUnit)
+      pivoted.agg(avg("value"))
+    else
+      pivoted.agg(avg("value"), first("unit"))
 
     if (dropNull)
-      pivoted.na.drop("any")
+      pivotAgg.na.drop("any")
     else
-      pivoted
+      pivotAgg
   }
 
   //
