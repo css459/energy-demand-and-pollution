@@ -27,38 +27,6 @@ object util {
     df.write.format("csv").save(filepath)
   }
 
-  //  def removeMeans(df: DataFrame, cols: Array[String]): DataFrame = {
-  //    cols
-  //      .foldLeft(df) { (tempDf, colName) =>
-  //        tempDf.withColumn(
-  //          colName,
-  ////          normalizeCol(df, colName, useStd = true, useMean = true)
-  //          df(colName) - mean(col(colName))
-  //
-  //        )
-  //      }
-  //  }
-  //
-  //  def normalizeCol(df: DataFrame, col: String, useStd: Boolean, useMean: Boolean): Column = {
-  //    // Make the vector assembler for input to scaler
-  //    val assembler = new VectorAssembler().setInputCols(col).setOutputCol(col)
-  //
-  //    // Create the Standard Scaler
-  //    val scaler = new StandardScaler()
-  //      .setInputCol(col)
-  //      .setOutputCol(col)
-  //      .setWithStd(useStd)
-  //      .setWithMean(useMean)
-  //
-  //    // Vectorize input columns for scaler
-  //    val vector = assembler.transform(df.select(col))
-  //
-  //    // Fit, transform, return
-  //    val scalerModel = scaler.fit(vector)
-  //    scalerModel.transform(vector)(col)
-  //  }
-
-
   /**
     * Appends to the input DataFrame a column of Vectors which correspond to the
     * scaled input features from the given "cols" of the DataFrame. The ordering
