@@ -9,6 +9,7 @@ package bdad.etl
 
 import org.apache.spark.ml.feature.{MaxAbsScaler, MinMaxScaler, StandardScaler, VectorAssembler}
 import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 
 /**
@@ -174,6 +175,35 @@ object util {
 
       // Drop the unscaled features, return
       scalerModel.transform(vectors).drop("features")
+    }
+  }
+
+  /**
+   * Creates a simple moving average for a specified column,
+   * grouping by columns, `byCols`, for a number of periods before
+   * and after each value in the ordering.
+   * The column is appended to the DataFrame in the form: "col_sma12"
+   *
+   * @param df      DataFrame to work on
+   * @param byCols  Columns to group by
+   * @param cols    Columns for which to find SMA
+   * @param periods Number of periods before and after to consider
+   * @return DataFrame with appended columns
+   */
+  def sma(df: DataFrame, byCols: Array[String], cols: Array[String], periods: Int = 12): DataFrame = {
+
+    // Create a sliding window, grouped byCol, ordered by dateGMT
+    val wSpec = Window
+      .partitionBy(byCols.head, byCols.tail: _*)
+      .orderBy("dateGMT")
+      .rowsBetween(-1 * periods, periods)
+
+    // Iterate over all specified columns
+    cols.foldLeft(df) { (tempDF, colName) =>
+
+      // Column name in the form: "col_sma12"
+      val newColName = colName + "_sma" + periods.toString
+      tempDF.withColumn(newColName, avg(tempDF(colName)).over(wSpec))
     }
   }
 

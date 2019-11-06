@@ -10,6 +10,7 @@ package bdad.etl.airdata
 import java.nio.file.Paths
 
 import bdad.etl.airdata.AirDataset.ETL
+import bdad.etl.util._
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -190,6 +191,21 @@ class AirDataset(var years: Array[Int] = AirDataset.ALL_YEARS, var criteria: Arr
     .map(_.toString)
     .map(_.stripPrefix("["))
     .map(_.stripSuffix("]"))
+
+  /**
+   * Returns a fully-prepared dataset. The relevant features
+   * are averaged with SMA, normalized, and scaled to range [-1,1]
+   */
+  lazy val prepared: DataFrame = {
+    val piv = pivotedDF(dropNull = true, dropUnit = true)
+    val smaDF = sma(piv, Array("lat", "lon"), validCriteria)
+
+    val smaCols = smaDF.columns.filter(c => c.contains("_sma"))
+    val selectedCols = Array("lat", "lon", "dateGMT") ++ smaCols
+
+    val smaOnly = smaDF.select(selectedCols.head, selectedCols.tail: _*)
+    maxAbs(normalize(smaOnly, smaCols, useMean = true, useStd = true))
+  }
 
   /**
     * Returns the combined, cleaned Dataframe of this class, but pivoted on the Criteria column.
