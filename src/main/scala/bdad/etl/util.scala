@@ -7,7 +7,7 @@
 
 package bdad.etl
 
-import org.apache.spark.ml.feature.{MaxAbsScaler, StandardScaler, VectorAssembler}
+import org.apache.spark.ml.feature.{MaxAbsScaler, MinMaxScaler, StandardScaler, VectorAssembler}
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 
@@ -114,6 +114,55 @@ object util {
 
       // Create the Standard Scaler
       val scaler = new MaxAbsScaler()
+        .setInputCol("features")
+        .setOutputCol("scaled_features")
+
+      // Vectorize input columns for scaler
+      val vectors = assembler.transform(df)
+
+      // Fit, transform
+      val scalerModel = scaler.fit(vectors.select("features"))
+
+      // Drop the unscaled features, return
+      scalerModel.transform(vectors).drop("features")
+    }
+  }
+
+  /**
+   * Appends to the input DataFrame a column of Vectors which correspond to the
+   * min-max-scaled input features from the given "cols" of the DataFrame. The
+   * ordering of the vectors is the same as the initial ordering of the input columns.
+   * Data is scaled to range [0,1]
+   *
+   * This transformer can be chained with other transformers of this object
+   * that output a "scaled_features" column. This is done by providing a
+   * single-element array of "scaled_features" for "cols". This is a
+   * default parameter.
+   *
+   * @param df   DataFrame with Columns to scale
+   * @param cols A list of Columns in the DataFrame
+   * @return DataFrame with appended "scaled_features" column containing Vector objects
+   */
+  def minMax(df: DataFrame, cols: Array[String] = Array("scaled_features")): DataFrame = {
+
+    // Identify a chained operation on "scaled_features" and
+    // process it specially
+    if (cols.length == 1 && cols(0).equals("scaled_features")) {
+      val scaler = new MinMaxScaler()
+        .setInputCol("scaled_features_orig")
+        .setOutputCol("scaled_features")
+
+      val dff = df
+        .withColumnRenamed("scaled_features", "scaled_features_orig")
+
+      scaler.fit(dff).transform(dff).drop("scaled_features_orig")
+    } else {
+
+      // Make the vector assembler for input to scaler
+      val assembler = new VectorAssembler().setInputCols(cols).setOutputCol("features")
+
+      // Create the Standard Scaler
+      val scaler = new MinMaxScaler()
         .setInputCol("features")
         .setOutputCol("scaled_features")
 

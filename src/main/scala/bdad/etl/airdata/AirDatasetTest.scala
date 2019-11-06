@@ -1,6 +1,5 @@
 package bdad.etl.airdata
 
-import bdad.etl.util.{maxAbs, normalize}
 import org.apache.spark.sql.SparkSession
 
 object AirDatasetTest extends App {
@@ -8,7 +7,6 @@ object AirDatasetTest extends App {
   val spark = SparkSession
     .builder
     .appName("Airdata ETL Operations")
-    .config("spark.master", "local")
     .getOrCreate
 
   val criteria = Array("gasses/*")
@@ -28,13 +26,15 @@ object AirDatasetTest extends App {
   // println("UNITS")
   // df.select("unit").distinct.show(false)
 
-  // Test of Utilities: Scaling Features of Pivoted DataFrame
-  val piv = airdata.pivotedDF(dropNull = true, dropUnit = true)
-  piv.show(false)
+  //  // Test of Utilities: Scaling Features of Pivoted DataFrame
+  //  val piv = airdata.pivotedDF(dropNull = true, dropUnit = true)
+  //  piv.show(false)
+  //
+  //  // Apply Normalization using Std and Mean
+  //  val normed = normalize(piv, airdata.validCriteria, useMean = true, useStd = true)
+  //
+  //  // Apply Max Absolute scaling to get values in range [-1,1]
+  //  maxAbs(normed, Array("scaled_features")).show(false)
 
-  // Apply Normalization using Std and Mean
-  val normed = normalize(piv, airdata.validCriteria, useMean = true, useStd = true)
-
-  // Apply Max Absolute scaling to get values in range [-1,1]
-  maxAbs(normed, Array("scaled_features")).show(false)
+  println(airdata.matrix.take(10))
 }
