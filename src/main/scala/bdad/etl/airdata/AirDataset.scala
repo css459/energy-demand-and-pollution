@@ -10,10 +10,7 @@ package bdad.etl.airdata
 import java.nio.file.Paths
 
 import bdad.etl.airdata.AirDataset.ETL
-import bdad.etl.util.{maxAbs, minMax, normalize}
 import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.spark.ml.linalg.Vector
-import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -184,22 +181,6 @@ class AirDataset(var years: Array[Int] = AirDataset.ALL_YEARS, var criteria: Arr
   val df: DataFrame = ETL.convertSchema(AirDataset.ETL.selectRelevantCols(formMajorDF(formFileList())))
 
   /**
-   * A representation of the `df` contained by this object in a cleaned, scaled,
-   * and featurized matrix format suitable for machine learning applications.
-   *
-   * The time will be rescaled to number of hours since epoch, and then
-   * the range will be constrained to [0,1] such that the first observation
-   * will have time=0.0 and the last observation will have time=1.0
-   *
-   * Each row is a **lat/lon pair at a point in time**
-   *
-   * The matrix will have the following layout:
-   * lat lon time criteria_1 ... criteria_n
-   * The ordering of criteria is the same as in `validCriteria`
-   */
-  lazy val matrix: RDD[Vector] = prepareMatrix(pivotedDF(dropNull = true, dropUnit = true))
-
-  /**
     * The set of criteria covered by this instance of the AIRDATA dataset.
     */
   val validCriteria: Array[String] = df
@@ -290,38 +271,5 @@ class AirDataset(var years: Array[Int] = AirDataset.ALL_YEARS, var criteria: Arr
     dirList
       .map(spark.read.option("header", "true").csv(_))
       .reduce(_ union _)
-  }
-
-  /**
-   * Prepares the matrix used by the `matrix` property of AirDataset.
-   * The following operations are performed:
-   * lat, lon, time are rescaled to range [0,1]
-   * criteria columns are normalized and scaled to range [-1,1]
-   * state and county are dropped
-   *
-   * @param df Input DataFrame (pivoted)
-   * @return RDD Matrix
-   */
-  private def prepareMatrix(df: DataFrame): RDD[Vector] = {
-    validCriteria.foreach(println)
-    val criteria = df.select(validCriteria.head, validCriteria.tail: _*)
-    val criteriaMatrix: RDD[Vector] =
-      maxAbs(normalize(criteria, criteria.columns, useMean = true, useStd = true))
-        .select("scaled_features")
-        .rdd
-        .map(r => r(0).asInstanceOf[Vector])
-
-    // DEBUG
-    criteriaMatrix.take(10).foreach(println)
-
-    val idCols = df.columns.filter(c => !validCriteria.contains(c))
-
-    //TODO: Compute the minimum date, transform the id cols
-    //      Merge the Id cols and the criteria
-    val minDate = df.select("dateGMT")
-    val idRows = df.select(idCols.head, idCols.tail: _*)
-      .withColumn("date", df(""))
-    val idMatrix: RDD[Vector] = minMax(idRows, idRows.columns)
-
   }
 }
