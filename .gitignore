@@ -5,3 +5,5 @@
 target/
 
 scratch-cole/data
+
+.DS_Store
