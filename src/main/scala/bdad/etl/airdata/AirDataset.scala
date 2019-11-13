@@ -180,6 +180,7 @@ class AirDataset(var years: Array[Int] = AirDataset.ALL_YEARS, var criteria: Arr
     * The converted, cleaned, and filtered DataFrame for the given class instance.
     */
   val df: DataFrame = ETL.convertSchema(AirDataset.ETL.selectRelevantCols(formMajorDF(formFileList())))
+    .coalesce(years.length) // One partition for each year considered
 
   /**
     * The set of criteria covered by this instance of the AIRDATA dataset.
