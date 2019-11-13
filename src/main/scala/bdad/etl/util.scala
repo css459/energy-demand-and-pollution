@@ -21,11 +21,24 @@ object util {
   /**
     * Writes the provided Dataframe to disk.
     *
-    * @param df       Dataframe to write to disk
-    * @param filepath File path to write to (including filename.csv)
+    * @param df           Dataframe to write to disk
+    * @param filepath     File path to write to (including filename.csv)
+    * @param coalesceTo1  Coalesce to a single partition to only write 1 file
     */
-  def writeToDisk(df: DataFrame, filepath: String): Unit = {
-    df.write.format("csv").save(filepath)
+  def writeToDisk(df: DataFrame, filepath: String, coalesceTo1: Boolean = false): Unit = {
+    if (coalesceTo1) {
+      df
+        .coalesce(1)
+        .write
+        .option("mapreduce.fileoutputcommitter.marksuccessfuljobs","false")
+        .option("header","true")
+        .csv(filepath)
+    } else {
+      df
+        .write
+        .option("header","true")
+        .csv(filepath)
+    }
   }
 
   /**
