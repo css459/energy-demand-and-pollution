@@ -6,6 +6,15 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 
 object Scenarios {
+
+  /**
+   * This Scenario includes all the criteria gasses from the past 5 years
+   * as of 2019. The measurements are grouped into daily averages, and include
+   * the latitude, longitude, state, county, and normalized feature vector
+   * for the criteria gasses.
+   *
+   * NOTE: Only areas for which all gasses could be measured are included.
+   */
   val gasses2014to2019: DataFrame = {
     val air = new AirDataset(AirDataset.makeYearList(2014, 2019), "gasses/*")
     val criteria = air.validCriteria

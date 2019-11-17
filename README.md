@@ -14,3 +14,13 @@
     
 4. Optional: `./spark-shell.sh` to have access to shell with this project
  classes available.
+ 
+ ## Scenario Analysis
+ 
+ Analysis of data sets defined by the `bdad.etl.Scenarios`
+ package are available in `doc/`. This includes a more
+ in-depth look at the underlying signal(s) within the
+ scenario.
+ 
+ Currently this is defined for the Criteria Gasses
+ (2014-2019) data set.
