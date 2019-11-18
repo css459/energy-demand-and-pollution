@@ -1,9 +1,17 @@
 *.class
 *.log
-
 .idea/
-target/
-
 scratch-cole/data
-
 .DS_Store
+.ipynb_checkpoints
+
+# SBT
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+.history
+.cache
+.lib/
