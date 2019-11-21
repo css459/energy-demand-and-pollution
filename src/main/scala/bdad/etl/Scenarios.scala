@@ -26,7 +26,9 @@ object Scenarios {
       .groupBy(year(col("dateGMT")), dayofyear(col("dateGMT")))
       .mean()
 
+    val sorted = grouped.sort("year(dateGMT)", "dayofyear(dateGMT)")
+
     // Create the normalized vector column and return the resulting DataFrame
-    normalize(grouped, criteria.map("avg(" + _ + ")"), useMean = true, useStd = true)
+    normalize(sorted, criteria.map("avg(" + _ + ")"), useMean = true, useStd = true)
   }
 }
