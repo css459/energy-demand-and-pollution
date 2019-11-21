@@ -1,7 +1,7 @@
 package bdad.etl
 
 import bdad.etl.airdata.AirDataset
-import bdad.etl.util.{maxAbs, normalize}
+import bdad.etl.util.normalize
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 
@@ -27,6 +27,6 @@ object Scenarios {
       .mean()
 
     // Create the normalized vector column and return the resulting DataFrame
-    maxAbs(normalize(grouped, criteria.map("avg(" + _ + ")"), useMean = true, useStd = true))
+    normalize(grouped, criteria.map("avg(" + _ + ")"), useMean = true, useStd = true)
   }
 }
