@@ -1,5 +1,6 @@
 package bdad.model
 
+import bdad.Context
 import org.apache.spark.SparkContext
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.ml.linalg.Vector
@@ -10,16 +11,16 @@ import org.apache.spark.sql.DataFrame
 object TLCC {
 
   /**
-   * Transposes the vector column of a given DataFrame such
-   * that the RDD returned is a list of columns within that
-   * list of Vectors. Each row in the final RDD is a dimension
-   * of the input vectors.
-   * The key is the dimension number. The value is the column values.
-   *
-   * @param df        DataFrame containing Vector column
-   * @param vectorCol Name of the vector column
-   * @return Columns within the list of Vectors
-   */
+    * Transposes the vector column of a given DataFrame such
+    * that the RDD returned is a list of columns within that
+    * list of Vectors. Each row in the final RDD is a dimension
+    * of the input vectors.
+    * The key is the dimension number. The value is the column values.
+    *
+    * @param df        DataFrame containing Vector column
+    * @param vectorCol Name of the vector column
+    * @return Columns within the list of Vectors
+    */
   def breakoutVectorCols(df: DataFrame, vectorCol: String = "scaled_features"): RDD[(Int, Array[Double])] = {
 
     // Convert the Vector column to an RDD of Array[Double]
@@ -38,16 +39,16 @@ object TLCC {
   }
 
   /**
-   * Shifts a signal by the specified number of units.
-   * If `shift` is negative, then the signal
-   * will slide backwards.
-   *
-   * @param signal  Time series signal to slide
-   * @param shift   Number of units to shift the signal forward
-   *                (positive) or backward (negative)
-   * @param padding If true, appends zeros to voided elements
-   * @return Shifted signal
-   */
+    * Shifts a signal by the specified number of units.
+    * If `shift` is negative, then the signal
+    * will slide backwards.
+    *
+    * @param signal  Time series signal to slide
+    * @param shift   Number of units to shift the signal forward
+    *                (positive) or backward (negative)
+    * @param padding If true, appends zeros to voided elements
+    * @return Shifted signal
+    */
   def shiftSignal(signal: Array[Double], shift: Int, padding: Boolean = false): Array[Double] = {
 
     // No shift, no-op
@@ -75,14 +76,14 @@ object TLCC {
   }
 
   /**
-   * Pearson Correlation between two signals.
-   *
-   * @param s1 Signal 1
-   * @param s2 Signal 2
-   * @return Pearson Correlation
-   */
+    * Pearson Correlation between two signals.
+    *
+    * @param s1 Signal 1
+    * @param s2 Signal 2
+    * @return Pearson Correlation
+    */
   def cor(s1: Array[Double], s2: Array[Double]): Double = {
-    val spark = SparkContext.getOrCreate
+    val spark = Context.context
     val rdd1 = spark.parallelize(s1)
     val rdd2 = spark.parallelize(s2)
 
@@ -90,17 +91,17 @@ object TLCC {
   }
 
   /**
-   * Computes a single time-lagged cross correlation between
-   * two signals by sliding the test signal forward (or backward)
-   * by the shift parameter. If `shift` is negative, then the signal
-   * will slide backwards.
-   *
-   * @param testSignal   Time series signal to slide
-   * @param anchorSignal Time series signal to compare against
-   * @param shift        Number of units to shift the signal forward
-   *                     (positive) or backward (negative)
-   * @return Pearson Correlation
-   */
+    * Computes a single time-lagged cross correlation between
+    * two signals by sliding the test signal forward (or backward)
+    * by the shift parameter. If `shift` is negative, then the signal
+    * will slide backwards.
+    *
+    * @param testSignal   Time series signal to slide
+    * @param anchorSignal Time series signal to compare against
+    * @param shift        Number of units to shift the signal forward
+    *                     (positive) or backward (negative)
+    * @return Pearson Correlation
+    */
   def tlcc(testSignal: Array[Double], anchorSignal: Array[Double], shift: Int): Double = {
     if (shift == 0) return cor(testSignal, anchorSignal)
 
@@ -120,7 +121,33 @@ object TLCC {
   }
 }
 
-// TODO
+/**
+  * Computes the Pearson Cross Correlation matrix
+  * for two sets of vectors, within two DataFrames.
+  *
+  * The DataFrames should contain a column of type `Vector`.
+  * This column should represent a data point in time. The
+  * column should be a scaled representation of the data, which
+  * can be generated with functions from `bdad.etl.util`.
+  *
+  * The DataFrames will then be joined, on the `year` and `day of year`
+  * The vectors are broken out column-wise, and the cartesian product
+  * is used to form an all-play-all correlation matrix.
+  *
+  * This matrix is calculated for each lag in `lags`, which is the number
+  * of units (positive for forward, negative for backward) to shift the
+  * values in `dfX`, while comparing against static `dfY`.
+  *
+  * @param dfX        Input DataFrame containing a column of Vectors
+  * @param dfY        Input DataFrame containing a column of Vectors
+  * @param lags       Array of lag times in units
+  * @param vectorColX Name of the Vector column in `dfX`
+  * @param yearColX   Name of the Vector column in `dfX`
+  * @param dayColX    Name of the dayOfYear column in `dfX`
+  * @param vectorColY Name of the Vector column in `dfY`
+  * @param yearColY   Name of the dayOfYear column in `dfY`
+  * @param dayColY    Name of the dayOfYear column in `dfY`
+  */
 class TLCC(dfX: DataFrame, dfY: DataFrame, lags: Array[Int],
            vectorColX: String = "scaled_features",
            yearColX: String = "year(dateGMT)", dayColX: String = "dayofyear(dateGMT)",
@@ -191,9 +218,6 @@ class TLCC(dfX: DataFrame, dfY: DataFrame, lags: Array[Int],
     val combos: RDD[(Int, (Int, Array[Double]), (Int, Array[Double]))] = slideCols.cartesian(anchorCols)
       .flatMap { case (a, b) => broadcastLags.value.map(l => (l, a, b)) }
 
-    // DEBUG
-    combos.take(3).foreach(println)
-
     println("[ TLCC ] Generating cross correlations")
 
     // Calculate the correlations
@@ -201,7 +225,6 @@ class TLCC(dfX: DataFrame, dfY: DataFrame, lags: Array[Int],
       ((idx, idy, l), // Vector labels for X and Y, the lag
         TLCC.tlcc(vecX, vecY, l)) // The correlation
     }
-
 
     //    // Combine the X vectors into a new RDD with the key as
     //    // the lag amount, and the values are `slideCols`

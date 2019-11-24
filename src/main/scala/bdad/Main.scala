@@ -2,16 +2,7 @@ package bdad
 
 import bdad.etl.Scenarios
 import bdad.model.TLCC
-import org.apache.spark.sql.SparkSession
 object Main extends App {
-
-  val spark = SparkSession
-    .builder
-    .appName("Airdata ETL Operations")
-    .getOrCreate
-
-  spark.sparkContext.setLogLevel("WARN")
-
   val gasses = Scenarios.gasses2019test
 
   // writeToDisk(gasses, "gasses-2014-2019")

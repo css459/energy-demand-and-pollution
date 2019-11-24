@@ -1,17 +1,11 @@
 package bdad.etl.airdata
 
-import bdad.etl.util._
-import bdad.etl.Scenarios.gasses2014to2019
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.SparkSession
+//import bdad.etl.util._
+//import bdad.etl.Scenarios.gasses2014to2019
+//import org.apache.spark.sql.functions._
+//import org.apache.spark.sql.SparkSession
 
 object AirDatasetTest extends App {
-
-  val spark = SparkSession
-    .builder
-    .appName("Airdata ETL Operations")
-    .getOrCreate
-
   //  // Saves the Gas Scenario to Disk
   //  // Converts the scaled features to a string
   //  val d = gasses2014to2019
