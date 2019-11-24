@@ -1,14 +1,13 @@
-package bdad.model
+package bdad.model.TLCC
 
-import bdad.Context
+import org.apache.commons.math3.stat.correlation.PearsonsCorrelation
 import org.apache.spark.SparkContext
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.ml.linalg.Vector
-import org.apache.spark.mllib.stat.Statistics
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.DataFrame
 
-object TLCC {
+object TLCCModel {
 
   /**
     * Transposes the vector column of a given DataFrame such
@@ -21,7 +20,8 @@ object TLCC {
     * @param vectorCol Name of the vector column
     * @return Columns within the list of Vectors
     */
-  def breakoutVectorCols(df: DataFrame, vectorCol: String = "scaled_features"): RDD[(Int, Array[Double])] = {
+  def breakoutVectorCols(df: DataFrame, vectorLabels: Array[String],
+                         vectorCol: String = "scaled_features"): RDD[(String, Array[Double])] = {
 
     // Convert the Vector column to an RDD of Array[Double]
     val vectors: Array[Array[Double]] = df.rdd.map(r => r.getAs[Vector](vectorCol).toArray).collect
@@ -35,7 +35,7 @@ object TLCC {
     //    Use N partitions (one for each dimension)
     //    Collect each dimension to a local array
     spark.parallelize(Seq.range(0, n), n)
-      .map(i => (i, vectors.map(a => a(i))))
+      .map(i => (vectorLabels(i), vectors.map(a => a(i))))
   }
 
   /**
@@ -83,11 +83,12 @@ object TLCC {
     * @return Pearson Correlation
     */
   def cor(s1: Array[Double], s2: Array[Double]): Double = {
-    val spark = Context.context
-    val rdd1 = spark.parallelize(s1)
-    val rdd2 = spark.parallelize(s2)
-
-    Statistics.corr(rdd1, rdd2)
+    //    val spark = Context.context
+    //    val rdd1 = spark.parallelize(s1)
+    //    val rdd2 = spark.parallelize(s2)
+    //
+    //    Statistics.corr(rdd1, rdd2)
+    new PearsonsCorrelation().correlation(s1, s2)
   }
 
   /**
@@ -106,7 +107,7 @@ object TLCC {
     if (shift == 0) return cor(testSignal, anchorSignal)
 
     // Shift the test signal without padding
-    val shiftedTestSignal = TLCC.shiftSignal(testSignal, shift)
+    val shiftedTestSignal = TLCCModel.shiftSignal(testSignal, shift)
 
     // Slice the anchor signal
     // If forward positive shift, slice [shift, length]
@@ -120,6 +121,7 @@ object TLCC {
     }
   }
 }
+
 
 /**
   * Computes the Pearson Cross Correlation matrix
@@ -138,21 +140,25 @@ object TLCC {
   * of units (positive for forward, negative for backward) to shift the
   * values in `dfX`, while comparing against static `dfY`.
   *
-  * @param dfX        Input DataFrame containing a column of Vectors
-  * @param dfY        Input DataFrame containing a column of Vectors
-  * @param lags       Array of lag times in units
-  * @param vectorColX Name of the Vector column in `dfX`
-  * @param yearColX   Name of the Vector column in `dfX`
-  * @param dayColX    Name of the dayOfYear column in `dfX`
-  * @param vectorColY Name of the Vector column in `dfY`
-  * @param yearColY   Name of the dayOfYear column in `dfY`
-  * @param dayColY    Name of the dayOfYear column in `dfY`
+  * @param dfIX Input DataFrame Ingress object
+  * @param dfIY Input DataFrame Ingress object
+  * @param lags Array of lag times in units
   */
-class TLCC(dfX: DataFrame, dfY: DataFrame, lags: Array[Int],
-           vectorColX: String = "scaled_features",
-           yearColX: String = "year(dateGMT)", dayColX: String = "dayofyear(dateGMT)",
-           vectorColY: String = "scaled_features",
-           yearColY: String = "year(dateGMT)", dayColY: String = "dayofyear(dateGMT)") {
+class TLCCModel(dfIX: TLCCIngress, dfIY: TLCCIngress, lags: Array[Int]) {
+
+  //
+  // Private Fields
+  //
+
+  private val dfX = dfIX.df
+  private val dfY = dfIY.df
+
+  private val vectorColX = dfIX.vectorCol
+  private val yearColX = dfIX.yearCol
+  private val dayColX = dfIX.dayCol
+  private val vectorColY = dfIY.vectorCol
+  private val yearColY = dfIY.yearCol
+  private val dayColY = dfIY.dayCol
 
   // The discrete name for the vector columns of the X
   // and Y DataFrames
@@ -184,6 +190,10 @@ class TLCC(dfX: DataFrame, dfY: DataFrame, lags: Array[Int],
       "inner")
   }
 
+  //
+  // Public Functions
+  //
+
   /**
     * Compute every combination of cross correlation
     * for every given lag using cartesian product between
@@ -194,7 +204,7 @@ class TLCC(dfX: DataFrame, dfY: DataFrame, lags: Array[Int],
     *
     * @return Result RDD
     */
-  def allPlayAll(): RDD[((Int, Int, Int), Double)] = {
+  def allPlayAll(): RDD[((String, String, Int), Double)] = {
     println("[ TLCC ] Starting TLCC Job")
 
     println("[ TLCC ] Joining DataFrames")
@@ -203,8 +213,10 @@ class TLCC(dfX: DataFrame, dfY: DataFrame, lags: Array[Int],
     println("[ TLCC ] Breaking out vector columns")
 
     // Break out vectors into IDs and values
-    val slideCols: RDD[(Int, Array[Double])] = TLCC.breakoutVectorCols(joined, xFeatures).persist
-    val anchorCols: RDD[(Int, Array[Double])] = TLCC.breakoutVectorCols(joined, yFeatures).persist
+    val slideCols: RDD[(String, Array[Double])] =
+      TLCCModel.breakoutVectorCols(joined, dfIX.vectorColLabels, xFeatures).persist
+    val anchorCols: RDD[(String, Array[Double])] =
+      TLCCModel.breakoutVectorCols(joined, dfIY.vectorColLabels, yFeatures).persist
 
     println("[ TLCC ] Generating combinations for jobs")
 
@@ -215,7 +227,7 @@ class TLCC(dfX: DataFrame, dfY: DataFrame, lags: Array[Int],
 
     // From the cartesian product (All-Play-All) of the slide cols and anchor cols,
     // append all needed lags to get all correlations needed
-    val combos: RDD[(Int, (Int, Array[Double]), (Int, Array[Double]))] = slideCols.cartesian(anchorCols)
+    val combos: RDD[(Int, (String, Array[Double]), (String, Array[Double]))] = slideCols.cartesian(anchorCols)
       .flatMap { case (a, b) => broadcastLags.value.map(l => (l, a, b)) }
 
     println("[ TLCC ] Generating cross correlations")
@@ -223,7 +235,7 @@ class TLCC(dfX: DataFrame, dfY: DataFrame, lags: Array[Int],
     // Calculate the correlations
     combos.map { case (l, (idx, vecX), (idy, vecY)) =>
       ((idx, idy, l), // Vector labels for X and Y, the lag
-        TLCC.tlcc(vecX, vecY, l)) // The correlation
+        TLCCModel.tlcc(vecX, vecY, l)) // The correlation
     }
 
     //    // Combine the X vectors into a new RDD with the key as

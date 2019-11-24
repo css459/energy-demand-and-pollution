@@ -8,13 +8,13 @@ import org.apache.spark.sql.functions._
 object Scenarios {
 
   /**
-   * This Scenario includes all the criteria gasses from the past 5 years
-   * as of 2019. The measurements are grouped into daily averages, and include
-   * the latitude, longitude, state, county, and normalized feature vector
-   * for the criteria gasses.
-   *
-   * NOTE: Only areas for which all gasses could be measured are included.
-   */
+    * This Scenario includes all the criteria gasses from the past 5 years
+    * as of 2019. The measurements are grouped into daily averages, and include
+    * the latitude, longitude, state, county, and normalized feature vector
+    * for the criteria gasses.
+    *
+    * NOTE: Only areas for which all gasses could be measured are included.
+    */
   val gasses2014to2019: DataFrame = {
     val air = new AirDataset(AirDataset.makeYearList(2014, 2019), "gasses/*")
     val criteria = air.validCriteria
@@ -28,11 +28,16 @@ object Scenarios {
 
     val sorted = grouped.sort("year(dateGMT)", "dayofyear(dateGMT)")
 
+    // The grouping renamed the columns, change this back
+    val renamed: DataFrame = criteria
+      .foldLeft(sorted)((acc, c) => acc.withColumnRenamed("avg(" + c + ")", c))
+
     // Create the normalized vector column and return the resulting DataFrame
-    normalize(sorted, criteria.map("avg(" + _ + ")"), useMean = true, useStd = true)
+    //    normalize(sorted, criteria.map("avg(" + _ + ")"), useMean = true, useStd = true)
+    normalize(renamed, criteria, useMean = true, useStd = true)
   }
 
-  val gasses2019test: DataFrame = {
+  val gasses2019test: (DataFrame, Array[String]) = {
     val air = new AirDataset(2019, "gasses/*")
     val criteria = air.validCriteria
 
@@ -45,7 +50,11 @@ object Scenarios {
 
     val sorted = grouped.sort("year(dateGMT)", "dayofyear(dateGMT)")
 
+    // The grouping renamed the columns, change this back
+    val renamed: DataFrame = criteria
+      .foldLeft(sorted)((acc, c) => acc.withColumnRenamed("avg(" + c + ")", c))
+
     // Create the normalized vector column and return the resulting DataFrame
-    normalize(sorted, criteria.map("avg(" + _ + ")"), useMean = true, useStd = true)
+    (normalize(renamed, criteria, useMean = true, useStd = true), criteria)
   }
 }
