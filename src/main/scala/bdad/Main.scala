@@ -16,7 +16,7 @@ object Main extends App {
 
   // writeToDisk(gasses, "gasses-2014-2019")
 
-  new TLCC(gasses, gasses, Array(1, 2, 3)).fit().take(3).foreach(println)
+  new TLCC(gasses, gasses, Array(1, 2, 3)).allPlayAll().take(3).foreach(println)
 
   //  gasses.select("scaled_features").show(20, truncate = false)
   //  breakoutVectorCols(gasses).take(20).foreach(r => println(r.toString))
