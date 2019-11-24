@@ -1,9 +1,8 @@
 package bdad
 
 import bdad.etl.Scenarios
-import bdad.etl.util.writeToDisk
+import bdad.model.TLCC
 import org.apache.spark.sql.SparkSession
-
 object Main extends App {
 
   val spark = SparkSession
@@ -13,9 +12,11 @@ object Main extends App {
 
   spark.sparkContext.setLogLevel("WARN")
 
-  val gasses = Scenarios.gasses2014to2019
-  writeToDisk(gasses, "gasses-2014-2019")
+  val gasses = Scenarios.gasses2019test
 
+  // writeToDisk(gasses, "gasses-2014-2019")
+
+  new TLCC(gasses, gasses, Array(1, 2, 3)).fit().take(3).foreach(println)
 
   //  gasses.select("scaled_features").show(20, truncate = false)
   //  breakoutVectorCols(gasses).take(20).foreach(r => println(r.toString))

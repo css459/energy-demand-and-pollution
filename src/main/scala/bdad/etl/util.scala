@@ -18,16 +18,6 @@ import org.apache.spark.sql.functions._
   */
 object util {
 
-  //  def extractFeatureRDD(df: DataFrame, colName: String = "scaled_features"): RDD[Vector] = {
-  //    val sqlContext = SparkSession.builder.getOrCreate.sqlContext
-  //
-  //    // Import implicits (required for implicit Encoders)
-  //    import sqlContext.implicits._
-  //
-  //    val features = df.select(colName)
-  //    features.as[Vector].rdd
-  //  }
-
   /**
     * Writes the provided Dataframe to disk.
     *
