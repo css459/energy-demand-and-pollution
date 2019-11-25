@@ -1,3 +1,10 @@
+//
+// BDAD Final Project
+// Spark Context
+// Cole Smith
+// Context.scala
+//
+
 package bdad
 
 import org.apache.spark.SparkContext

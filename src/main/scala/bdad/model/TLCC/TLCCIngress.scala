@@ -1,3 +1,10 @@
+//
+// BDAD Final Project
+// TLCC Model
+// Cole Smith
+// TLCCIngress.scala
+//
+
 package bdad.model.TLCC
 
 import org.apache.spark.sql.DataFrame
@@ -35,14 +42,16 @@ class TLCCIngress(val df: DataFrame, val vectorColLabels: Array[String],
   if (!hasColumn(df, dayCol))
     throw new Exception("Ingress DataFrame did not contain day column:" + dayCol)
 
+  // TODO
   // Verify column types
   var failure = false
   for ((name, dtype) <- df.dtypes) {
-    if (name.equals(vectorCol) && !dtype.toLowerCase.equals("vector")) failure = true
-    if (name.equals(yearCol) && !dtype.toLowerCase.equals("int")) failure = true
-    if (name.equals(dayCol) && !dtype.toLowerCase.equals("int")) failure = true
+    println(name + " : " + dtype)
+    //    if (name.equals(vectorCol) && !dtype.contains("org.apache.spark.ml.linalg.Vector")) failure = true
+    //    if (name.equals(yearCol) && !dtype.equals("IntegerType")) failure = true
+    //    if (name.equals(dayCol) && !dtype.equals("IntegerType")) failure = true
   }
-
-  if (failure)
-    throw new Exception("Column type mismatch. Verify:\n" + df.schema.toString)
+  //
+  //  if (failure)
+  //    throw new Exception("Column type mismatch. Verify:\n" + df.schema.toString)
 }

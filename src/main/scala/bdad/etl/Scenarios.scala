@@ -1,3 +1,10 @@
+//
+// BDAD Final Project
+// Dataset ETL Scenarios
+// Cole Smith
+// Scenarios.scala
+//
+
 package bdad.etl
 
 import bdad.etl.airdata.AirDataset
@@ -15,7 +22,7 @@ object Scenarios {
     *
     * NOTE: Only areas for which all gasses could be measured are included.
     */
-  val gasses2014to2019: DataFrame = {
+  val gasses2014to2019: (DataFrame, Array[String]) = {
     val air = new AirDataset(AirDataset.makeYearList(2014, 2019), "gasses/*")
     val criteria = air.validCriteria
 
@@ -34,7 +41,7 @@ object Scenarios {
 
     // Create the normalized vector column and return the resulting DataFrame
     //    normalize(sorted, criteria.map("avg(" + _ + ")"), useMean = true, useStd = true)
-    normalize(renamed, criteria, useMean = true, useStd = true)
+    (normalize(renamed, criteria, useMean = true, useStd = true), criteria)
   }
 
   val gasses2019test: (DataFrame, Array[String]) = {

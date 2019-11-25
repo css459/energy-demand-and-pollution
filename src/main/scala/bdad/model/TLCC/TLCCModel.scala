@@ -1,3 +1,10 @@
+//
+// BDAD Final Project
+// TLCC Model
+// Cole Smith
+// TLCCModel.scala
+//
+
 package bdad.model.TLCC
 
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation
@@ -83,11 +90,6 @@ object TLCCModel {
     * @return Pearson Correlation
     */
   def cor(s1: Array[Double], s2: Array[Double]): Double = {
-    //    val spark = Context.context
-    //    val rdd1 = spark.parallelize(s1)
-    //    val rdd2 = spark.parallelize(s2)
-    //
-    //    Statistics.corr(rdd1, rdd2)
     new PearsonsCorrelation().correlation(s1, s2)
   }
 
@@ -220,8 +222,6 @@ class TLCCModel(dfIX: TLCCIngress, dfIY: TLCCIngress, lags: Array[Int]) {
 
     println("[ TLCC ] Generating combinations for jobs")
 
-    //    val combos = slideCols.mapValues(v => lagRDD.map(l => (l, v)))
-
     // Broadcast the lags to all workers so they can be used with RDDs
     val broadcastLags: Broadcast[Array[Int]] = SparkContext.getOrCreate.broadcast(lags)
 
@@ -237,101 +237,5 @@ class TLCCModel(dfIX: TLCCIngress, dfIY: TLCCIngress, lags: Array[Int]) {
       ((idx, idy, l), // Vector labels for X and Y, the lag
         TLCCModel.tlcc(vecX, vecY, l)) // The correlation
     }
-
-    //    // Combine the X vectors into a new RDD with the key as
-    //    // the lag amount, and the values are `slideCols`
-    //    val lagsX: RDD[(Int, (Int, Array[Double]))] = slideCols
-    //      .flatMap { case (id, vec) => broadcastLags.value.map(l => (l, (id, vec))) }
-    //
-    //    // Combine the Y vectors into a new RDD with the key as
-    //    // the lag amount, and the values are `anchorCols`
-    //    val lagsY: RDD[(Int, (Int, Array[Double]))] = anchorCols
-    //      .flatMap { case (id, vec) => broadcastLags.value.map(l => (l, (id, vec))) }
-    //
-    //    // Cogroup the two RDDs above
-    //    // This will generate for each lag integer a list of two values. ie:
-    //    //    lag : [ (id, vec), (id, vec) ]
-    //    // Where the first entry is from X, and the second is from Y
-    //
-    //    val groupingsRDD: RDD[((Int, (Int, Array[Double])), (Int, (Int, Array[Double])))] = lagsX.cartesian(lagsY)
-
-    //    val explode = groupings.ma
-
-    //    // Zip the cogroup, this will allow us to access the values
-    //    // from a case statement and compute the TLCC using the `TLCC.tlcc`
-    //    // function
-    //    val g2: RDD[(Int, ((Int, Array[Double]), (Int, Array[Double])))] =
-    //    groupings.mapValues { case (iter1, iter2) => iter1.zip(iter2).head }
-    //
-    //    // DEBUG
-    //    g2.take(10).foreach(println)
-    //
-    //    println("[ TLCC ] Generating cross correlations")
-    //
-    //    // Calculate the correlations
-    //    val cors = g2.map { case (l, ( (idx, vecx), (idy, vecy) )) =>
-    //      ((idx, idy, l),               // Vector labels for X and Y, the lag
-    //        TLCC.tlcc(vecx, vecy, l))   // The correlation
-    //    }
-    //
-    //    cors
   }
-
-  //  (1,List(((1,[D@3e917218),(0,[D@40e0e658)), ((2,[D@1a6d31b3),(3,[D@184d3cc3)), ((3,[D@2df99c60),(1,[D@6aec6da1)), ((0,[D@197f39e6),(2,[D@6825a52e))))
-  //  (2,List(((2,[D@9de2ed6),(0,[D@d6db29)), ((0,[D@600662dc),(2,[D@254fb727)), ((1,[D@5d9f85c6),(1,[D@6b2612cf)), ((3,[D@38659df5),(3,[D@60cbf351))))
-  //  (3,List(((3,[D@41dbeb3b),(2,[D@1ab039a5)), ((2,[D@eae9533),(1,[D@3140becc)), ((1,[D@2f5c19ec),(3,[D@343a70b3)), ((0,[D@4e477c0a),(0,[D@7a451dd0))))
-
-
-  // We will treat the dimensions in dfY as the anchor vectors, we
-  // will then slide the dimensions from dfX over them in all-play-all
-  // fashion.
-
-  //  def fit(): RDD[((Int, Int), Double)] = {
-  //    println("[ TLCC ] Starting TLCC Job")
-  //
-  //    val slideCols: RDD[(Int, RDD[Double])] = TLCC.breakoutVectorCols(dfX, vectorColX).persist
-  //    val anchorCols: RDD[(Int, RDD[Double])] = TLCC.breakoutVectorCols(dfY, vectorColY).persist
-  //
-  //    println("[ TLCC ] Column breakout done. Starting combination generation for jobs")
-  //
-  //    val testCols: RDD[(Int, RDD[Double])] = slideCols.map { case (id, vec) =>
-  //      (
-  //        id,
-  //        lags.foreach(lag => TLCC.shiftSignal(vec, padding = False))
-  //      )
-  //    }
-  //
-  //    // A collect call is necessary here since flatMap requires an interable
-  //    val combos: RDD[((Int, Int), (RDD[Double], RDD[Double]))] =
-  //      anchorCols.flatMap{case (idy, vecY) => slideCols.collect().map{case (idx, vecX) => ( (idy, idx), (vecY, vecX) )}}
-  //
-  //    println("[ TLCC ] Combinations done. Starting cross correlation jobs")
-  //
-  //    SparkContext.getOrCreate.parallelize(lags, lags.length).map( lag =>
-  //      combos.collect.map { case ( (idy, idx), (vecY, vecX) ) =>
-  //        ((idx, idy), TLCC.tlcc(vecX, vecY, lag))
-  //      }
-  //    )
-
-  //    // Generate all lag columns in form
-  //    //    (test col index, lag amount), [vector]
-  //    val testCols: RDD[((Int, Int), RDD[Double])] =
-  //    SparkContext.getOrCreate.parallelize(lags)
-  //      .flatMap(lag => slideCols.map(col => ((col._1, lag), TLCC.shiftSignal(col._2, lag, padding = false))))
-  //
-  //    println("[ TLCC ] Column breakout done. Starting cross correlation jobs")
-  //
-  //    SparkContext.getOrCreate.parallelize(lags)
-  //
-  //      // Generate all the combinations of (lag, x col, y col) that we need
-  //      .flatMap(lag =>
-  //        slideCols.flatMap(xCol =>
-  //          anchorCols.map(yCol =>
-  //            (lag, xCol, yCol))))
-  //
-  //      // Execute TLCC for each (lag, x col, y col)
-  //      .map((lag, xCol, yCol) => )
-  //  }
-
-
 }
