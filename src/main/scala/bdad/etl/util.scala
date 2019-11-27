@@ -8,9 +8,9 @@
 package bdad.etl
 
 import org.apache.spark.ml.feature.{MaxAbsScaler, MinMaxScaler, StandardScaler, VectorAssembler}
-import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.{DataFrame, SaveMode}
 
 /**
   * Utility functions and resources for
@@ -21,19 +21,38 @@ object util {
   /**
     * Writes the provided Dataframe to disk.
     *
-    * @param df           Dataframe to write to disk
-    * @param filepath     File path to write to (including filename.csv)
-    * @param coalesceTo1  Coalesce to a single partition to only write 1 file
+    * @param df          Dataframe to write to disk
+    * @param filepath    File path to write to (including filename.csv)
+    * @param coalesceTo1 Coalesce to a single partition to only write 1 file
+   * @param overwrite    Overwrites existing
     */
-  def writeToDisk(df: DataFrame, filepath: String, coalesceTo1: Boolean = false): Unit = {
+  def writeToDisk(df: DataFrame, filepath: String, coalesceTo1: Boolean = false,
+                  overwrite: Boolean = false): Unit = {
     if (coalesceTo1) {
+      if (overwrite) {
+        df
+          .coalesce(1)
+          .write
+          .mode(SaveMode.Overwrite)
+          .option("mapreduce.fileoutputcommitter.marksuccessfuljobs", "false")
+          .option("header", "true")
+          .csv(filepath)
+      }
       df
         .coalesce(1)
         .write
         .option("mapreduce.fileoutputcommitter.marksuccessfuljobs","false")
         .option("header","true")
         .csv(filepath)
+
     } else {
+      if (overwrite) {
+        df
+          .write
+          .option("header", "true")
+          .mode(SaveMode.Overwrite)
+          .csv(filepath)
+      }
       df
         .write
         .option("header","true")
