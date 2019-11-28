@@ -35,7 +35,8 @@ object Scenarios {
       // val loaded = Context.spark.read.format("avro").load("gasses-2014-2019.avro")
       val loaded = Context.spark.read.parquet("gasses-2014-2019.parquet")
       val loadedLabels = Context.context.textFile("gasses-2014-2019.labels").collect()
-      (normalize(loaded, loadedLabels, useMean = true, useStd = true), loadedLabels)
+      val sorted = loaded.sort("year", "dayofyear")
+      (normalize(sorted, loadedLabels, useMean = true, useStd = true), loadedLabels)
     } else {
 
       val air = new AirDataset(AirDataset.makeYearList(2014, 2019), "gasses/*")
@@ -53,15 +54,25 @@ object Scenarios {
       // The grouping renamed the columns, change this back
       val renamed: DataFrame = criteria
         .foldLeft(sorted)((acc, c) => acc.withColumnRenamed("avg(" + c + ")", c))
+        .withColumnRenamed("year(dateGMT)", "year")
+        .withColumnRenamed("dayofyear(dateGMT)", "dayofyear")
+
+      // Remove invalid characters in columns
+      val cleaned: DataFrame = renamed.columns
+        .foldLeft(renamed)((acc, c) =>
+          acc.withColumnRenamed(c, c.replaceAll("[()]", "").replace(" ", "_")))
+
+      val cleanedCriteria = criteria
+        .map(c => c.replaceAll("[()]", "").replace(" ", "_"))
 
       // Save down to file
       // renamed.write.format("avro").save("gasses-2014-2019.avro")
-      renamed.write.parquet("gasses-2014-2019.parquet")
-      Context.context.parallelize(criteria).saveAsTextFile("gasses-2014-2019.labels")
+      cleaned.write.parquet("gasses-2014-2019.parquet")
+      Context.context.parallelize(cleanedCriteria).saveAsTextFile("gasses-2014-2019.labels")
 
       // Create the normalized vector column and return the resulting DataFrame
       //    normalize(sorted, criteria.map("avg(" + _ + ")"), useMean = true, useStd = true)
-      (normalize(renamed, criteria, useMean = true, useStd = true), criteria)
+      (normalize(cleaned, cleanedCriteria, useMean = true, useStd = true), cleanedCriteria)
     }
   }
 
