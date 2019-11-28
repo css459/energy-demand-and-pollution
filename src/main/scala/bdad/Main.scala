@@ -34,5 +34,5 @@ object Main extends App {
   // second argument to a different Ingress.
   val cors: RDD[((String, String, Int), Double)] =
   new TLCCModel(gassesIngress, gassesIngress, Array(-90, -60, -30, 0, 30, 60, 90)).allPlayAll()
-  cors.saveAsTextFile("gasses-2014-2019-autocorr2.txt")
+  cors.saveAsTextFile("gasses-2014-2019-autocorr3.txt")
 }

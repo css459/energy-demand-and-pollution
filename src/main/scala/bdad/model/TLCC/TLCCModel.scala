@@ -108,17 +108,22 @@ object TLCCModel {
   def tlcc(testSignal: Array[Double], anchorSignal: Array[Double], shift: Int): Double = {
     if (shift == 0) return cor(testSignal, anchorSignal)
 
-    // Shift the test signal without padding
-    val shiftedTestSignal = TLCCModel.shiftSignal(testSignal, shift)
-
     // Slice the anchor signal
     // If forward positive shift, slice [shift, length]
     // If backward negative shift, slice [0, length - shift]
     if (shift > 0) {
+      // Shift the test signal without padding
+      val shiftedTestSignal = TLCCModel.shiftSignal(testSignal, shift)
       val sliced = anchorSignal.slice(shift, anchorSignal.length)
       cor(shiftedTestSignal, sliced)
     } else {
-      val sliced = anchorSignal.slice(0, anchorSignal.length - shift)
+      //      val sliced = anchorSignal.slice(0, anchorSignal.length - shift)
+      //      cor(shiftedTestSignal, sliced)
+
+      // A backward shift of the test signal is the same as a forward
+      // shift of the anchor signal
+      val shiftedTestSignal = TLCCModel.shiftSignal(anchorSignal, shift * -1)
+      val sliced = testSignal.slice(shift, testSignal.length)
       cor(shiftedTestSignal, sliced)
     }
   }
