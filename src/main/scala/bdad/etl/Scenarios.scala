@@ -20,7 +20,7 @@ object Scenarios {
    * to HDFS. Turn off to re-generate
    * Scenarios
    */
-  val readFromFile: Boolean = false
+  val readFromFile: Boolean = true
 
   /**
     * This Scenario includes all the criteria gasses from the past 5 years
@@ -30,9 +30,8 @@ object Scenarios {
     *
     * NOTE: Only areas for which all gasses could be measured are included.
     */
-  val gasses2014to2019LatLon: (DataFrame, Array[String]) = {
+  def gasses2014to2019LatLon(): (DataFrame, Array[String]) = {
     if (readFromFile) {
-      // val loaded = Context.spark.read.format("avro").load("gasses-2014-2019.avro")
       val loaded = Context.spark.read.parquet("gasses-2014-2019.parquet")
       val loadedLabels = Context.context.textFile("gasses-2014-2019.labels").collect()
       val sorted = loaded.sort("year", "dayofyear")
@@ -45,7 +44,6 @@ object Scenarios {
       // Get the average criteria for all areas for each day from 2014-2019
       val grouped = air
         .pivotedDF(dropNull = true, dropUnit = true)
-        //        .select("dateGMT", criteria: _*)
         .groupBy(year(col("dateGMT")), dayofyear(col("dateGMT")),
           col("lat"), col("lon"))
         .mean()
@@ -85,7 +83,7 @@ object Scenarios {
    *
    * NOTE: Only areas for which all gasses could be measured are included.
    */
-  val gasses2014to2019: (DataFrame, Array[String]) = {
+  def gasses2014to2019(): (DataFrame, Array[String]) = {
     if (readFromFile) {
       // val loaded = Context.spark.read.format("avro").load("gasses-2014-2019.avro")
       val loaded = Context.spark.read.parquet("gasses-2014-2019-no-latlon.parquet")
@@ -131,7 +129,7 @@ object Scenarios {
     }
   }
 
-  val gasses2019test: (DataFrame, Array[String]) = {
+  def gasses2019test(): (DataFrame, Array[String]) = {
     val air = new AirDataset(2019, "gasses/*")
     val criteria = air.validCriteria
 
