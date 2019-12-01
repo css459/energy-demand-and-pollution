@@ -65,3 +65,7 @@ def save_series_to_csv(series, range):
             writer.writerow([tuple[0], tuple[1]])
             rows_written += 1
     print("wrote " + str(rows_written) + " to " + csv_filename)
+
+
+if __name__== "__main__":
+    pull_data_all()

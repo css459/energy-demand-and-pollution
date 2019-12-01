@@ -9,6 +9,7 @@ package bdad.etl
 
 import bdad.Context
 import bdad.etl.airdata.AirDataset
+import bdad.etl.petroleumdata.PetroleumDataset
 import bdad.etl.util.normalize
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
@@ -20,7 +21,7 @@ object Scenarios {
    * to HDFS. Turn off to re-generate
    * Scenarios
    */
-  val readFromFile: Boolean = true
+  val readFromFile: Boolean = false
 
   /**
     * This Scenario includes all the criteria gasses from the past 5 years
@@ -129,6 +130,14 @@ object Scenarios {
     }
   }
 
+  /**
+   * This Scenario includes all the criteria gasses but from only 2019. The
+   * measurements are grouped into daily averages, and include the
+   * latitude, longitude, state, county, and normalized feature vector
+   * for the criteria gasses.
+   *
+   * NOTE: Only areas for which all gasses could be measured are included.
+   */
   def gasses2019test(): (DataFrame, Array[String]) = {
     val air = new AirDataset(2019, "gasses/*")
     val criteria = air.validCriteria
@@ -148,5 +157,19 @@ object Scenarios {
 
     // Create the normalized vector column and return the resulting DataFrame
     (normalize(renamed, criteria, useMean = true, useStd = true), criteria)
+  }
+
+  /**
+   * This Scenario includes the daily spot prices of petroleum only for 2019.
+   * The data contains the spot price, date and extracted year, as well as day
+   * of year.
+   */
+  def petroleum2019test(): (DataFrame, Array[String]) = {
+    val petroleum = new PetroleumDataset(year = 2019)
+    // preprocessed df ready to be normalized on Price and in correct format for joins on year, day of year
+    val processed = petroleum.dayProcessed
+    val columns = petroleum.columns
+
+    (normalize(processed, columns, useMean = true, useStd = true), columns)
   }
 }

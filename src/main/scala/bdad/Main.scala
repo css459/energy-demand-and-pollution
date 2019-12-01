@@ -29,9 +29,27 @@ object Main extends App {
     cors.saveAsTextFile("gasses-2014-2019-autocorr3.txt")
   }
 
+  def correlation(): Unit = {
+    // Computes only on 2019 data for example purposes
+    val (gasses, gas_labels) = Scenarios.gasses2019test()
+    val (petroleum, petroleum_labels) = Scenarios.petroleum2019test()
+
+    val gassesIngress = new TLCCIngress(gasses, gas_labels)
+    val petroleumIngress = new TLCCIngress(petroleum, petroleum_labels)
+
+    // Computes cross-correlation between un-shifted signals of gas and petroleum
+    val cors: RDD[((String, String, Int), Double)] =
+    new TLCCModel(gassesIngress, petroleumIngress, Array(0)).allPlayAll()
+    cors.saveAsTextFile("gases-petroleumprice-corr-2019.txt")
+  }
+
   def heatmap(): Unit = {
     GassesHeatmap.makeMap(2019, "heatmap-gasses-2019.csv")
   }
 
+  // Compute the correlation between the 2 signals
+  correlation()
+
+  // Generate a heatmap for visualization of gas geo data
   heatmap()
 }

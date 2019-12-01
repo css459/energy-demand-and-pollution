@@ -1,0 +1,1 @@
+scp -oProxyJump=ad3634@gw.hpc.nyu.edu target/scala-2.11/bdad-final-project_2.11-0.1.jar ad3634@dumbo.es.its.nyu.edu:/home/ad3634/bdad-final-project/target/scala-2.11/bdad-final-project_2.11-0.1.jar

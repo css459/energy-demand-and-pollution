@@ -37,6 +37,8 @@ function renderLayer () {
     const hexagonLayer = new HeatmapLayer({
         id: 'heat-map',
         colorRange: COLOR_RANGE,
+        threshold: 0.005,
+        radiusPixels: 50,
         data,
         elevationRange: [0, 1000],
         elevationScale: 150,
