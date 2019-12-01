@@ -9,19 +9,14 @@
 <body>
 <div id="viz-control">
     <div>
-        <label>Radius</label>
-        <input id="radius" type="range" min="500" max="1500" step="100" value="1000"/>
-        <span id="radius-value"></span>
+        <label>HeatMap Radius</label>
+        <input id="radiusPixels" type="range" min="10" max="100" step="10" value="90"/>
+        <span id="radiusPixels-value"></span>
     </div>
     <div>
-        <label>Coverage</label>
-        <input id="coverage" type="range" min="0" max="1" step="0.1" value="0.4"/>
-        <span id="coverage-value"></span>
-    </div>
-    <div>
-        <label>Upper Percentile</label>
-        <input id="upperPercentile" type="range" min="90" max="100" step="1" value="99"/>
-        <span id="upperPercentile-value"></span>
+        <label>HeatMap Threshold</label>
+        <input id="threshold" type="range" min="0.005" max="0.2" step="0.005" value="0.105"/>
+        <span id="threshold-value"></span>
     </div>
 </div>
 </body>

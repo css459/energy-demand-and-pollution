@@ -35,7 +35,7 @@ def limit_range(url_string, start_date, end_date):
 #
 def pull_data_all():
     string = build_API_string(base_url, API_KEY)
-    save_series_to_csv(make_request(string), "all")
+    save_series_to_csv(make_request(string), "all", "PETROLEUM.csv")
 
 #
 # Pull the raw data given a range
@@ -53,8 +53,11 @@ def make_request(url):
     series = data["series"][0]["data"]
     return series
 
-def save_series_to_csv(series, range):
-    csv_filename = "petroleum-spot-prices-" + range + ".csv"
+def save_series_to_csv(series, range, file_name = None):
+    if file_name:
+        csv_filename = file_name
+    else:
+        csv_filename = "petroleum-spot-prices-" + range + ".csv"
 
     print("starting write to " + csv_filename)
     rows_written = 0

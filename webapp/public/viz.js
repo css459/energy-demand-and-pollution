@@ -12,7 +12,7 @@ const deckgl = new DeckGL({
 });
 
 let data = null;
-const OPTIONS = ['radius', 'coverage', 'upperPercentile'];
+const OPTIONS = ['radiusPixels', 'threshold'];
 const COLOR_RANGE = [
     [1, 152, 189],
     [73, 227, 206],
