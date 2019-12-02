@@ -107,7 +107,37 @@ It computes the total "pollution badness" by taking the **L2 Norm**
 of the normalized **Criteria Gasses** features at each Latitude/Longitude
 pair for a given year.
 
-## `CostRepresentation` **(TODO)**
+## `CostRepresentation` (Actuation, Remediation)
+
+Given the results found from our TLCC analysis, 
+we now deduce a scoring measure for any given region
+with the current petroleum spot price(s) and past air quality data. We first
+define a measure of overall pollution as the L2 Norm of each (normalized) criteria
+gas moving averages for a given latitude/longitude pair, on a given day. 
+
+Before computing the L2 norm,
+the air quality moving averages are computed by taking the Simple Moving Average
+(SMA) over $n$ periods, where $n$ is the best lag found from the TLCC analysis.
+
+The petroleum spot price for the current
+day is then divided by this value to get the dollar-impact of pollution. If there
+are multiple petroleum prices considered, they are again the L2 Norm of the
+normalized price signals.
+
+
+Let $X :=$ Criteria Gas signals by Time and Location
+Let $X_{\text{SMA}_n} :=$ SMA of $X$ over $n$ periods
+Let $Y :=$ Petroleum Price signals by Time (for each Location)
+
+\[\textit{For each row $i$ in X and Y,}\]
+\[\textit{score} := \frac{\Vert Y_i \Vert}{\Vert X_{\text{SMA}_n} \Vert}\]
+
+Using this score for a region, we can deduce the trend of the overall scoring
+signal for a given area of interest by computing the historical scores for that
+area. Moreover, one can compare regions by energy demand using this measure by
+comparing their scores. Notice that this is the same as comparing the regions
+by the pollution values themselves, since the numerator of the score is the
+same for all regions. We discuss the values of these scores in the next section.
 
 # UI
 
