@@ -183,11 +183,13 @@ class TLCCModel(dfIX: TLCCIngress, dfIY: TLCCIngress, lags: Array[Int]) {
   private def joinDataframes(): DataFrame = {
     val vecsX = dfX.select(yearColX, dayColX, vectorColX)
       .withColumnRenamed(vectorColX, xFeatures)
+      .sort(yearColX, dayColX)
 
     vecsX.show(false)
 
     val vecsY = dfY.select(yearColY, dayColY, vectorColY)
       .withColumnRenamed(vectorColY, yFeatures)
+      .sort(yearColY, dayColY)
 
     vecsY.show(false)
 

@@ -14,6 +14,7 @@ and **Spark 2.4.0**
     libraryDependencies += "org.apache.commons" % "commons-math3" % "3.6"
     
 [SBT]: https://www.scala-sbt.org
+
 # Acquiring Data
 
 **WARNING**: AirData is 350 GB + in size, and this project assumes that
@@ -106,7 +107,7 @@ It computes the total "pollution badness" by taking the **L2 Norm**
 of the normalized **Criteria Gasses** features at each Latitude/Longitude
 pair for a given year.
 
-## `Heatmap`: "Pollution Dollars" **(TODO)**
+## `CostRepresentation` **(TODO)**
 
 # UI
 
