@@ -50,9 +50,15 @@ The total size of the dataset is over **350 GB**. For the purpose of our
 analysis, we have constrained our set to just the Criteria Gasses from 2014
 to 2019. However, this codebase **supports using the entire dataset.**
 
-# About the Data: Oil and Gas
+# About the Data: PetroleumData
+The data for Oil (Petroleum) is represented by a timeseries of spot prices from the EIA dataset
+for crude oil. The data from EIA contains various metrics ranging from imports/exports
+to futures and spot prices. Spot prices are chosen due to the simple representation, daily granularity, and 
+since they intuitively help us best quantify what demand might mean, since it is the price someone is 
+willing to pay for the resource on the current market.
 
-**TODO**
+Similar to the `AirData` in the previous section, for the purpose of our testing and analysis, we have
+constrained our dataset to spot price from 2014 to 2019 or to exclusively those from year 2019.
 
 # Package Layout: `etl`
 
@@ -75,6 +81,12 @@ This package controls making AirData subsets by specifying
 the required features and date range. All loading
 and cleaning is handled by this package, and done so efficiently
 such that only the required data is loaded into memory.
+
+## `etl.petroleumdata`
+
+This package controls making and processing PetroleumData datasets by specifying date ranges, 
+adding and removing columns based on use case, etc. This package handles the loading of the 
+petroleum data and creation of new columns.
 
 # Package Layout: `model`
 
@@ -139,9 +151,11 @@ comparing their scores. Notice that this is the same as comparing the regions
 by the pollution values themselves, since the numerator of the score is the
 same for all regions. We discuss the values of these scores in the next section.
 
+
+
 # UI
 
-## `HeatMap Viz` UI
+## `HeatMap Viz`
 
 The `webapp` directory contains a lightweight web application built to visualize the data outputted from our analytics.
 Please consult the specialized [README](webapp/README.md) file for the web app for directions on how to run it locally.

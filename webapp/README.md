@@ -16,7 +16,7 @@ The app visualizes a heatmap of lat, long data points representing the total "po
 main Spark application and is computed by taking the **L2 Norm** of the normalized **Criteria Gasses** features at each lat/long pair.
 Please consult the main `README.md` of the project as well as the `Heatmap.scala` class for more information. 
 
-Visualizations are done with [deck.gl], a powerful, open-source big data viz framework built on top of D3. The viz layers support large
+Visualizations are done with [deck.gl], a powerful, open-source big data viz framework built on top of WebGL. The viz layers support large
 amounts of rows but profit from the simple structure of the source `.csv`, only needing two columns for `lon` and `lat`. 
 
 [deck.gl]:https://deck.gl/#/
