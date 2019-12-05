@@ -129,7 +129,7 @@ gas moving averages for a given latitude/longitude pair, on a given day.
 
 Before computing the L2 norm,
 the air quality moving averages are computed by taking the Simple Moving Average
-(SMA) over $n$ periods, where $n$ is the best lag found from the TLCC analysis.
+(SMA) over `n` periods, where `n` is the best lag found from the TLCC analysis.
 
 The petroleum spot price for the current
 day is then divided by this value to get the dollar-impact of pollution. If there
