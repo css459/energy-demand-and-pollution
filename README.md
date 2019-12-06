@@ -175,3 +175,12 @@ written to disk only needs two columns for `lon`, `lat` that the `viz.js` script
 Example HeatMap Visualization (web app running on `localhost:8080`):
 
 ![image info](doc/screenshots/heatmap-example.png)
+
+# Contributions
+**Andrew: Petroleum Data and Webapp**
+
+`webapp`, `model.heatmap`, `etl.petroleumdata`, `scripts/petroleumdata`, `etl.Scenarios` (petroleum)
+
+**Cole: AirData and Supporting Files**
+
+`build.sbt`, `etl.util`, `model.TLCC`,`model.Heatmap`, `etl.airdata`, `etl.Scenarios` (pollution)
