@@ -141,8 +141,9 @@ Let $X :=$ Criteria Gas signals by Time and Location
 Let $X_{\text{SMA}_n} :=$ SMA of $X$ over $n$ periods
 Let $Y :=$ Petroleum Price signals by Time (for each Location)
 
-\[\textit{For each row $i$ in X and Y,}\]
-\[\textit{score} := \frac{\Vert Y_i \Vert}{\Vert X_{\text{SMA}_n} \Vert}\]
+$$\textit{For each row $i$ in X and Y,}$$
+
+$$\textit{score} := \frac{\Vert Y_i \Vert}{\Vert X_{\text{SMA}_n} \Vert}$$
 
 Using this score for a region, we can deduce the trend of the overall scoring
 signal for a given area of interest by computing the historical scores for that
