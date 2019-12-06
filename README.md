@@ -129,7 +129,7 @@ gas moving averages for a given latitude/longitude pair, on a given day.
 
 Before computing the L2 norm,
 the air quality moving averages are computed by taking the Simple Moving Average
-(SMA) over $n$ periods, where $n$ is the best lag found from the TLCC analysis.
+(SMA) over `n` periods, where `n` is the best lag found from the TLCC analysis.
 
 The petroleum spot price for the current
 day is then divided by this value to get the dollar-impact of pollution. If there
@@ -172,9 +172,9 @@ written to disk only needs two columns for `lon`, `lat` that the `viz.js` script
 
 [deck.gl]:https://deck.gl/#/
 
-Example HeatMap Visualization (web app running on `localhost:8080`):
+Example HeatMap Visualization with both `HeatMap` and `CostRepresentation HeatMap` (web app running on `localhost:8080`):
 
-![image info](doc/screenshots/heatmap-example.png)
+![image info](doc/screenshots/heatmap-both.png)
 
 # Contributions
 **Andrew: Petroleum Data and Webapp**
