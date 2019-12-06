@@ -151,8 +151,6 @@ comparing their scores. Notice that this is the same as comparing the regions
 by the pollution values themselves, since the numerator of the score is the
 same for all regions. We discuss the values of these scores in the next section.
 
-
-
 # UI
 
 ## `HeatMap Viz`
@@ -172,6 +170,6 @@ written to disk only needs two columns for `lon`, `lat` that the `viz.js` script
 
 [deck.gl]:https://deck.gl/#/
 
-Example HeatMap Visualization (web app running on `localhost:8080`):
+Example HeatMap Visualization with both `HeatMap` and `CostRepresentation HeatMap` (web app running on `localhost:8080`):
 
-![image info](doc/screenshots/heatmap-example.png)
+![image info](doc/screenshots/heatmap-both.png)
