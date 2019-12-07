@@ -12,11 +12,14 @@ token, but the background map layer will not be rendered.
 
 #### Visualization
 
-The app visualizes a heatmap of lat, long data points representing the total "pollution badness". The data comes from the
+The app visualizes a heatmap of lat, long data points representing the total "pollution badness" as well as 
+the cost-score heatmap that quantifies pollution per longitude / latitude point. The data comes from the
 main Spark application and is computed by taking the **L2 Norm** of the normalized **Criteria Gasses** features at each lat/long pair.
-Please consult the main `README.md` of the project as well as the `Heatmap.scala` class for more information. 
+Please consult the main `README.md` of the project as well as the `Heatmap.scala` and `CostRepresentation.scala` classes
+for more information. 
 
 Visualizations are done with [deck.gl], a powerful, open-source big data viz framework built on top of WebGL. The viz layers support large
-amounts of rows but profit from the simple structure of the source `.csv`, only needing two columns for `lon` and `lat`. 
+amounts of rows but profit from the simple structure of the source `.csv`, needing two columns for `lon` and `lat`, and in the
+case of the cost-score heatmap, a third column `score` to determine the weighting per longitude/latitude data point.
 
 [deck.gl]:https://deck.gl/#/
