@@ -1,5 +1,4 @@
-# BDAD Final Project
-## Quantifying the Environmental Impact of Fossil Fuel Demand
+# Quantifying the Environmental Impact of Fossil Fuel Demand
 
 # Requirements
 
