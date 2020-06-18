@@ -46,6 +46,49 @@ object TLCCModel {
   }
 
   /**
+    * Computes a single time-lagged cross correlation between
+    * two signals by sliding the test signal forward (or backward)
+    * by the shift parameter. If `shift` is negative, then the signal
+    * will slide backwards.
+    *
+    * @param testSignal   Time series signal to slide
+    * @param anchorSignal Time series signal to compare against
+    * @param shift        Number of units to shift the signal forward
+    *                     (positive) or backward (negative)
+    * @return Pearson Correlation
+    */
+  def tlcc(testSignal: Array[Double], anchorSignal: Array[Double], shift: Int): Double = {
+    if (shift == 0) return cor(testSignal, anchorSignal)
+
+    // Shift the test signal:
+    //    Positive: The past of the test signal is compared against the present anchor
+    //    Negative: The future of the test signal is compared against the present anchor
+    val shiftedTestSignal = TLCCModel.shiftSignal(testSignal, shift)
+
+    // Slice the anchor signal
+    // If forward positive shift, slice [shift, length]
+    // If backward negative shift, slice [0, length - shift]
+    if (shift > 0) {
+      val sliced = anchorSignal.slice(shift, anchorSignal.length)
+      cor(shiftedTestSignal, sliced)
+    } else {
+      val sliced = anchorSignal.slice(0, anchorSignal.length + shift) // (Recall that shift is negative)
+      cor(shiftedTestSignal, sliced)
+    }
+  }
+
+  /**
+    * Pearson Correlation between two signals.
+    *
+    * @param s1 Signal 1
+    * @param s2 Signal 2
+    * @return Pearson Correlation
+    */
+  def cor(s1: Array[Double], s2: Array[Double]): Double = {
+    new PearsonsCorrelation().correlation(s1, s2)
+  }
+
+  /**
     * Shifts a signal by the specified number of units.
     * If `shift` is negative, then the signal
     * will slide backwards.
@@ -74,57 +117,12 @@ object TLCCModel {
     } else {
       // Backward shift
       // Slice vector to range [shift, length]
-      val sliced = signal.slice(shift, signal.length)
+      // (Recall shift is negative)
+      val sliced = signal.slice(shift * -1, signal.length)
 
       // Pad with zeros in back
-      if (padding) Array.concat(sliced, Array.fill[Double](shift)(0))
+      if (padding) Array.concat(sliced, Array.fill[Double](shift * -1)(0))
       else sliced
-    }
-  }
-
-  /**
-    * Pearson Correlation between two signals.
-    *
-    * @param s1 Signal 1
-    * @param s2 Signal 2
-    * @return Pearson Correlation
-    */
-  def cor(s1: Array[Double], s2: Array[Double]): Double = {
-    new PearsonsCorrelation().correlation(s1, s2)
-  }
-
-  /**
-    * Computes a single time-lagged cross correlation between
-    * two signals by sliding the test signal forward (or backward)
-    * by the shift parameter. If `shift` is negative, then the signal
-    * will slide backwards.
-    *
-    * @param testSignal   Time series signal to slide
-    * @param anchorSignal Time series signal to compare against
-    * @param shift        Number of units to shift the signal forward
-    *                     (positive) or backward (negative)
-    * @return Pearson Correlation
-    */
-  def tlcc(testSignal: Array[Double], anchorSignal: Array[Double], shift: Int): Double = {
-    if (shift == 0) return cor(testSignal, anchorSignal)
-
-    // Slice the anchor signal
-    // If forward positive shift, slice [shift, length]
-    // If backward negative shift, slice [0, length - shift]
-    if (shift > 0) {
-      // Shift the test signal without padding
-      val shiftedTestSignal = TLCCModel.shiftSignal(testSignal, shift)
-      val sliced = anchorSignal.slice(shift, anchorSignal.length)
-      cor(shiftedTestSignal, sliced)
-    } else {
-      //      val sliced = anchorSignal.slice(0, anchorSignal.length - shift)
-      //      cor(shiftedTestSignal, sliced)
-
-      // A backward shift of the test signal is the same as a forward
-      // shift of the anchor signal
-      val shiftedTestSignal = TLCCModel.shiftSignal(anchorSignal, shift * -1)
-      val sliced = testSignal.slice(shift, testSignal.length)
-      cor(shiftedTestSignal, sliced)
     }
   }
 }
