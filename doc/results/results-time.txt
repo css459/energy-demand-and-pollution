@@ -1,0 +1,78 @@
+Warmup
+
+[ TLCC ] Preparation Took 53.019893325 seconds
+[ TLCC ] Generating cross correlations
+TIME: 53.625859999
+
+[ TLCC ] Preparation Took 4.304796171 seconds
+[ TLCC ] Generating cross correlations
+TIME: 4.392419104
+
+======== PARALLEL =========================
+
+8 Correlations, Vector Length 121
+[ TLCC ] Preparation Took 51.376499536 seconds
+[ TLCC ] Generating cross correlations
+TIME: 51.476621378
+0.100121842
+
+64 Correlations, Vector Length 121
+[ TLCC ] Preparation Took 99.583146416 seconds
+[ TLCC ] Generating cross correlations
+TIME: 99.698032052
+0.114885636
+
+8 Correlations, Vector Length 1947
+[ TLCC ] Preparation Took 2.414988423 seconds
+[ TLCC ] Generating cross correlations
+TIME: 2.480895326
+0.065906903
+
+64 Correlations, Vector Length 1947
+[ TLCC ] Preparation Took 1.487210054 seconds
+[ TLCC ] Generating cross correlations
+TIME: 1.573525451
+0.086315397
+
+======== SEQ 1 EXEC ==============================
+
+8 Correlations, Vector Length 121
+[ TLCC ] Preparation Took 52.364975962 seconds
+[ TLCC ] Generating cross correlations
+TIME: 52.405676183
+0.040700221
+
+64 Correlations, Vector Length 121
+[ TLCC ] Preparation Took 101.968876456 seconds
+[ TLCC ] Generating cross correlations
+TIME: 102.066016283
+0.097139827
+
+8 Correlations, Vector Length 1947
+[ TLCC ] Preparation Took 17.638378139 seconds
+[ TLCC ] Generating cross correlations
+TIME: 17.677390249
+0.03901211
+
+64 Correlations, Vector Length 1947
+[ TLCC ] Preparation Took 24.792995365 seconds
+[ TLCC ] Generating cross correlations
+TIME: 24.904845603
+0.111850238
+
+======== 112 Example ==============================
+
+Parallel: 1947
+[ TLCC ] Preparation Took 3.938727623 seconds
+[ TLCC ] Generating cross correlations
+Count: 112
+TIME: 4.149499702
+0.210772079
+
+Seq.: 1947
+[ TLCC ] Preparation Took 49.077962837 seconds
+[ TLCC ] Generating cross correlations
+Count: 112
+TIME: 49.270654898
+0.192692061
+

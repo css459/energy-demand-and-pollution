@@ -214,6 +214,9 @@ class TLCCModel(dfIX: TLCCIngress, dfIY: TLCCIngress, lags: Array[Int]) {
   def allPlayAll(): RDD[((String, String, Int), Double)] = {
     println("[ TLCC ] Starting TLCC Job")
 
+    // Time this section
+    val t1 = System.nanoTime
+
     println("[ TLCC ] Joining DataFrames")
     val joined = this.joinDataframes()
 
@@ -234,6 +237,9 @@ class TLCCModel(dfIX: TLCCIngress, dfIY: TLCCIngress, lags: Array[Int]) {
     // append all needed lags to get all correlations needed
     val combos: RDD[(Int, (String, Array[Double]), (String, Array[Double]))] = slideCols.cartesian(anchorCols)
       .flatMap { case (a, b) => broadcastLags.value.map(l => (l, a, b)) }
+
+    val duration = (System.nanoTime - t1) / 1e9d
+    println("[ TLCC ] Preparation Took " + duration + " seconds")
 
     println("[ TLCC ] Generating cross correlations")
 
