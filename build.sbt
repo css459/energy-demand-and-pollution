@@ -1,4 +1,4 @@
-name := "bdad-final-project"
+name := "energy-demand-and-pollution"
 
 version := "0.1"
 
