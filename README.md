@@ -23,9 +23,49 @@ it is on HDFS.
 
 Please consult the Python scripts and README file in `scripts/airdata`
 
+**Reproducability**: The exact `meta.json` output for our AirData analysis is as follows:
+
+{
+    "gasses": [
+        "ozone",
+        "so2",
+        "co",
+        "no2"
+    ],
+    "meteorological": [
+        "Winds",
+        "Temperature",
+        "Barometric Pressure",
+        "RH and Dewpoint"
+    ],
+    "num_datasets": 680,
+    "particulates": [
+        "PM2.5_FRM-FEM Mass",
+        "PM2.5_non_FRM-FEM Mass",
+        "PM10_Mass",
+        "PM2.5_Speciation",
+        "PM10_Speciation"
+    ],
+    "size_decompressed": "392GB",
+    "time_downloaded": "2019-10-17 17:48:37.885537",
+    "time_granularity": "hourly",
+    "time_to_download": 0.31,
+    "toxics": [
+        "HAPs",
+        "VOCs",
+        "NONOxNOy",
+        "Lead"
+    ]
+}
+
+This is given by the script in `scripts/airdata`. The latest date considered by our analysis (for Ozone specifically) is **May 29th, 2019**.
+At the time of our writing, this was the latest information available from the EIA. The data for all of 2019 can be gathered using our
+provided script.
+
 ## EIA Oil and Gas
 
-Please consult the Python script and the README file in `scripts/petroleumdata`
+Please consult the Python script and the README file in `scripts/petroleumdata`.
+The latest date considered by our analysis (for Ozone specifically) is **November 22nd, 2019**.
     
 # Running
 
